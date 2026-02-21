@@ -19,4 +19,6 @@ services:
         value: "false"
       - key: JPA_SHOW_SQL
         value: "false"
+      - key: VAADIN_PRODUCTION_MODE
+        value: "true"
 

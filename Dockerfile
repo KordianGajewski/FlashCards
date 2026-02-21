@@ -24,8 +24,9 @@ WORKDIR /app
 # Kopiuj zbudowany JAR
 COPY --from=build /app/target/*.jar app.jar
 
-# Render.com ustawia zmienną PORT
-EXPOSE 8080
+# Render.com ustawia zmienną PORT (domyślnie 10000)
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Optymalizacja pamięci dla darmowego planu Render (512 MB RAM)
+# Shell form — żeby zmienne środowiskowe ($PORT) były rozwijane w runtime
+CMD java -Xmx384m -Xms256m -XX:+UseSerialGC -Dserver.port=${PORT:-8080} -jar app.jar
 
