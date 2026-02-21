@@ -24,9 +24,10 @@ WORKDIR /app
 # Kopiuj zbudowany JAR
 COPY --from=build /app/target/*.jar app.jar
 
-# Render.com ustawia zmienną PORT (domyślnie 10000)
+# Render.com domyślnie ustawia PORT=10000
+ENV PORT=10000
 
 # Optymalizacja pamięci dla darmowego planu Render (512 MB RAM)
-# Shell form — żeby zmienne środowiskowe ($PORT) były rozwijane w runtime
-CMD java -Xmx384m -Xms256m -XX:+UseSerialGC -Dserver.port=${PORT:-8080} -jar app.jar
+# sh -c gwarantuje rozwinięcie $PORT w runtime
+CMD ["sh", "-c", "java -Xmx384m -Xms256m -XX:+UseSerialGC -Dserver.port=$PORT -jar app.jar"]
 
