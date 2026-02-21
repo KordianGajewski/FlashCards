@@ -7,10 +7,10 @@ WORKDIR /app
 COPY mvnw mvnw.cmd pom.xml ./
 COPY .mvn .mvn
 
-# Pobierz zależności (cache warstwy Dockera)
+# Pobierz zaleznosci (cache warstwy Dockera)
 RUN chmod +x mvnw && ./mvnw dependency:resolve -B
 
-# Kopiuj źródła
+# Kopiuj zrodla
 COPY src src
 
 # Buduj JAR z profilem produkcyjnym (Vaadin frontend bundle)
@@ -21,13 +21,12 @@ FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-# Kopiuj zbudowany JAR
-COPY --from=build /app/target/*.jar app.jar
+# Kopiuj TYLKO fat JAR (nie .jar.original)
+COPY --from=build /app/target/FlashCards-0.0.1-SNAPSHOT.jar app.jar
 
-# Render.com domyślnie ustawia PORT=10000
+# Render.com domyslnie ustawia PORT=10000
 ENV PORT=10000
 
-# Optymalizacja pamięci dla darmowego planu Render (512 MB RAM)
-# sh -c gwarantuje rozwinięcie $PORT w runtime
-CMD ["sh", "-c", "java -Xmx384m -Xms256m -XX:+UseSerialGC -Dserver.port=$PORT -jar app.jar"]
+# Optymalizacja pamieci dla darmowego planu Render (512 MB RAM)
+CMD ["sh", "-c", "java -Xmx384m -Xms256m -XX:+UseSerialGC -Dvaadin.productionMode=true -Dserver.port=$PORT -jar app.jar"]
 
