@@ -1,0 +1,22 @@
+# render.yaml – Render Blueprint (opcjonalny, ułatwia setup)
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: flashcards
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DB_URL
+        sync: false        # np. jdbc:mysql://gateway01.eu-central-1.prod.aws.tidbcloud.com:4000/test?sslMode=VERIFY_IDENTITY&enabledTLSProtocols=TLSv1.2,TLSv1.3
+      - key: DB_USERNAME
+        sync: false        # np. randomstring.root (z TiDB Cloud)
+      - key: DB_PASSWORD
+        sync: false        # hasło z TiDB Cloud
+      - key: WORDNIK_API_KEY
+        sync: false
+      - key: VAADIN_LAUNCH_BROWSER
+        value: "false"
+      - key: JPA_SHOW_SQL
+        value: "false"
+
