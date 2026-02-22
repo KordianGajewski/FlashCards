@@ -28,10 +28,12 @@ public class MainLayout extends AppLayout {
         RouterLink quizLink   = new RouterLink("Quiz",     QuizView.class);
         RouterLink reviewLink = new RouterLink("Powtórka", ReviewView.class);  // <-- NOWE
         RouterLink adminLink  = new RouterLink("Admin",    AdminView.class);
+        RouterLink userLink = new RouterLink("Moje fiszki", UserView.class);
 
         // Pokaż "Admin" tylko dla roli ADMIN
         boolean isAdmin = auth.hasAuthority("ROLE_ADMIN");
         adminLink.setVisible(isAdmin);
+        userLink.setVisible(!isAdmin); // <-- NOWE: widoczne tylko dla zwykłych użytkowników
 
         // Nazwa zalogowanego użytkownika
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -48,8 +50,9 @@ public class MainLayout extends AppLayout {
         HorizontalLayout header = new HorizontalLayout(
                 title,
                 quizLink,
-                reviewLink,   // <-- NOWE w navbarze
+                reviewLink,
                 adminLink,
+                userLink, // <-- NOWE w navbarze
                 spacer,
                 userSpan,
                 logoutBtn
