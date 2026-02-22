@@ -48,6 +48,7 @@ public class AdminView extends VerticalLayout {
     private final Grid<User> usersGrid = new Grid<>(User.class, false);
     private final TextField firstName = new TextField("Imię");
     private final TextField lastName = new TextField("Nazwisko");
+    private final TextField username = new TextField("Nazwa użytkownika");
     private final EmailField email = new EmailField("Email (login)");
     private final PasswordField password = new PasswordField("Hasło");
     private final IntegerField score = new IntegerField("Wynik");
@@ -160,6 +161,7 @@ public class AdminView extends VerticalLayout {
         usersGrid.addColumn(User::getId).setHeader("ID").setAutoWidth(true).setSortable(true);
         usersGrid.addColumn(User::getFirstName).setHeader("Imię").setAutoWidth(true).setSortable(true);
         usersGrid.addColumn(User::getLastName).setHeader("Nazwisko").setAutoWidth(true).setSortable(true);
+        usersGrid.addColumn(User::getUsername).setHeader("Username").setAutoWidth(true).setSortable(true);
         usersGrid.addColumn(User::getEmail).setHeader("Email").setAutoWidth(true).setSortable(true);
         usersGrid.addColumn(User::getScore).setHeader("Wynik").setAutoWidth(true).setSortable(true);
         usersGrid.addColumn(User::isAdmin).setHeader("Admin").setAutoWidth(true).setSortable(true);
@@ -178,10 +180,13 @@ public class AdminView extends VerticalLayout {
         score.setMin(0);
         score.setValue(0);
         email.setClearButtonVisible(true);
+        username.setClearButtonVisible(true);
         firstName.setClearButtonVisible(true);
         lastName.setClearButtonVisible(true);
         createUserBtn.addClickListener(e -> createUser());
 
+        username.getStyle().set("background", "#e3eafc");
+        username.getStyle().set("border-radius", "6px");
         email.getStyle().set("background", "#e3eafc");
         email.getStyle().set("border-radius", "6px");
         firstName.getStyle().set("background", "#e3eafc");
@@ -199,7 +204,7 @@ public class AdminView extends VerticalLayout {
         refreshUsersBtn.getStyle().set("background", "#f5f7fa");
         refreshUsersBtn.getStyle().set("color", "#3a7bd5");
         refreshUsersBtn.getStyle().set("border-radius", "6px");
-        HorizontalLayout userForm = new HorizontalLayout(firstName, lastName, email, password, score, admin, createUserBtn);
+        HorizontalLayout userForm = new HorizontalLayout(firstName, lastName, username, email, password, score, admin, createUserBtn);
         userForm.setWidthFull();
         userForm.setAlignItems(Alignment.END);
 
@@ -252,18 +257,23 @@ public class AdminView extends VerticalLayout {
     }
 
     private void createUser() {
-        if (email.isEmpty() || password.isEmpty()) {
-            Notification.show("Email i hasło są wymagane");
+        if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
+            Notification.show("Email, nazwa użytkownika i hasło są wymagane");
             return;
         }
         if (userRepository.existsByEmail(email.getValue())) {
             Notification.show("Użytkownik o takim emailu już istnieje");
             return;
         }
+        if (userRepository.findByUsername(username.getValue()).isPresent()) {
+            Notification.show("Użytkownik o takiej nazwie już istnieje");
+            return;
+        }
 
         User u = new User();
         u.setFirstName(firstName.getValue());
         u.setLastName(lastName.getValue());
+        u.setUsername(username.getValue());
         u.setEmail(email.getValue());
         u.setPassword(passwordEncoder.encode(password.getValue()));
         u.setScore(score.getValue() != null ? score.getValue() : 0);
@@ -284,6 +294,7 @@ public class AdminView extends VerticalLayout {
     private void clearUserForm() {
         firstName.clear();
         lastName.clear();
+        username.clear();
         email.clear();
         password.clear();
         score.setValue(0);
