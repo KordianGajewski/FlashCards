@@ -27,7 +27,8 @@ public interface UserFlashcardProgressRepository extends JpaRepository<UserFlash
 
     @Query("""
         select fc from FlashCard fc
-        where fc.id not in (
+        where fc.owner.id = :userId
+          and fc.id not in (
             select p.flashcard.id from UserFlashcardProgress p where p.user.id = :userId
         )
         """)

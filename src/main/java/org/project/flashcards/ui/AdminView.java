@@ -22,6 +22,8 @@ import org.project.flashcards.repository.FlashCardRepository;
 import org.project.flashcards.repository.UserRepository;
 import org.project.flashcards.repository.UserFlashcardProgressRepository;
 import org.project.flashcards.service.RandomWordService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
@@ -140,7 +142,12 @@ public class AdminView extends VerticalLayout {
         // seed – handler
         seedBtn.addClickListener(e -> {
             try {
-                int imported = randomWordService.importRandomWords(50);
+                User currentUser = getCurrentUser();
+                if (currentUser == null) {
+                    Notification.show("Nie można ustalić zalogowanego użytkownika");
+                    return;
+                }
+                int imported = randomWordService.importRandomWords(50, currentUser);
                 Notification.show("Zaimportowano: " + imported + " słów");
                 loadCards();
             } catch (Exception ex) {
@@ -237,12 +244,17 @@ public class AdminView extends VerticalLayout {
             Notification.show("Pytanie i odpowiedź są wymagane");
             return;
         }
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            Notification.show("Nie można ustalić zalogowanego użytkownika");
+            return;
+        }
         FlashCard fc = new FlashCard();
         fc.setQuestion(qQuestion.getValue().toLowerCase());
-        // Odpowiedź: tylko małe litery, polskie znaki, bez znaków interpunkcyjnych
         fc.setAnswer(qAnswer.getValue()
             .replaceAll("[\\p{Punct}]", "")
             .toLowerCase());
+        fc.setOwner(currentUser);
         flashCardRepository.save(fc);
 
         Notification.show("Dodano fiszkę");
@@ -252,8 +264,13 @@ public class AdminView extends VerticalLayout {
     }
 
     private void loadCards() {
-        List<FlashCard> all = flashCardRepository.findAll();
-        cardsGrid.setItems(all);
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            cardsGrid.setItems(List.of());
+            return;
+        }
+        List<FlashCard> myCards = flashCardRepository.findByOwner(currentUser);
+        cardsGrid.setItems(myCards);
     }
 
     private void createUser() {
@@ -299,5 +316,14 @@ public class AdminView extends VerticalLayout {
         password.clear();
         score.setValue(0);
         admin.setValue(false);
+    }
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return null;
+        String login = auth.getName();
+        return userRepository.findByEmail(login)
+                .or(() -> userRepository.findByUsername(login))
+                .orElse(null);
     }
 }

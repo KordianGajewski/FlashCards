@@ -9,9 +9,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 import org.project.flashcards.entity.FlashCard;
+import org.project.flashcards.entity.User;
 import org.project.flashcards.repository.FlashCardRepository;
 import org.project.flashcards.repository.UserFlashcardProgressRepository;
+import org.project.flashcards.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 
 @Route(value = "user", layout = MainLayout.class)
@@ -19,6 +23,7 @@ import java.util.List;
 public class UserView extends VerticalLayout {
     private final FlashCardRepository flashCardRepository;
     private final UserFlashcardProgressRepository progressRepository;
+    private final UserRepository userRepository;
     private final Grid<FlashCard> cardsGrid = new Grid<>(FlashCard.class, false);
     private final TextField qQuestion = new TextField("Pytanie");
     private final TextField qAnswer  = new TextField("Odpowiedź");
@@ -27,9 +32,11 @@ public class UserView extends VerticalLayout {
 
     @Autowired
     public UserView(FlashCardRepository flashCardRepository,
-                    UserFlashcardProgressRepository progressRepository) {
+                    UserFlashcardProgressRepository progressRepository,
+                    UserRepository userRepository) {
         this.flashCardRepository = flashCardRepository;
         this.progressRepository = progressRepository;
+        this.userRepository = userRepository;
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -95,11 +102,17 @@ public class UserView extends VerticalLayout {
             Notification.show("Pytanie i odpowiedź są wymagane");
             return;
         }
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            Notification.show("Nie można ustalić zalogowanego użytkownika");
+            return;
+        }
         FlashCard fc = new FlashCard();
         fc.setQuestion(qQuestion.getValue().toLowerCase());
         fc.setAnswer(qAnswer.getValue()
             .replaceAll("[\\p{Punct}]", "")
             .toLowerCase());
+        fc.setOwner(currentUser);
         flashCardRepository.save(fc);
         Notification.show("Dodano fiszkę");
         qQuestion.clear();
@@ -108,8 +121,22 @@ public class UserView extends VerticalLayout {
     }
 
     private void loadCards() {
-        List<FlashCard> all = flashCardRepository.findAll();
-        cardsGrid.setItems(all);
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            cardsGrid.setItems(List.of());
+            return;
+        }
+        List<FlashCard> myCards = flashCardRepository.findByOwner(currentUser);
+        cardsGrid.setItems(myCards);
+    }
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return null;
+        String login = auth.getName();
+        return userRepository.findByEmail(login)
+                .or(() -> userRepository.findByUsername(login))
+                .orElse(null);
     }
 }
 

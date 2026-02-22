@@ -19,8 +19,18 @@ public class FlashCard {
     private String question;
     private String answer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
     public FlashCard(String question, String answer) {
         this.question = question;
         this.answer = answer;
+    }
+
+    public FlashCard(String question, String answer, User owner) {
+        this.question = question;
+        this.answer = answer;
+        this.owner = owner;
     }
 }
