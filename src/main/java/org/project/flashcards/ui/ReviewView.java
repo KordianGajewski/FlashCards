@@ -83,13 +83,24 @@ public class ReviewView extends VerticalLayout {
         scheduleInfo.setText("");
         add(scheduleInfo);
 
+        String[] qualityLabels = {
+            "0 – brak wiedzy",
+            "1 – ach, to to!",
+            "2 – coś świtało",
+            "3 – z dużym trudem",
+            "4 – po chwili namysłu",
+            "5 – od razu!"
+        };
         for (int q = 0; q <= 5; q++) {
             int quality = q;
-            Button btn = new Button(String.valueOf(q), e -> submitQuality(quality));
-            btn.getStyle().set("margin", "0 0.2em");
+            Button btn = new Button(qualityLabels[q], e -> submitQuality(quality));
+            btn.getStyle().set("margin", "0.2em");
+            btn.getStyle().set("font-size", "0.85rem");
+            btn.getStyle().set("min-width", "140px");
             qualityButtons.add(btn);
         }
         qualityButtons.setVisible(false);
+        qualityButtons.getStyle().set("flex-wrap", "wrap");
         add(qualityButtons);
     }
 
