@@ -34,27 +34,20 @@ public class StatsView extends VerticalLayout {
         private final String folderName;
         private final long totalCards;
         private final long learnedCards;
-        private final int depth;
 
-        public FolderStats(String folderName, long totalCards, long learnedCards, int depth) {
+        public FolderStats(String folderName, long totalCards, long learnedCards) {
             this.folderName = folderName;
             this.totalCards = totalCards;
             this.learnedCards = learnedCards;
-            this.depth = depth;
         }
 
         public String getFolderName() { return folderName; }
         public long getTotalCards() { return totalCards; }
         public long getLearnedCards() { return learnedCards; }
-        public String getProgress() {
-            if (totalCards == 0) return "—";
-            return learnedCards + " / " + totalCards;
-        }
         public String getPercentage() {
             if (totalCards == 0) return "—";
             return String.format("%.0f%%", (double) learnedCards / totalCards * 100);
         }
-        public int getDepth() { return depth; }
     }
 
     @Autowired
@@ -97,11 +90,8 @@ public class StatsView extends VerticalLayout {
 
         // Grid ze statystykami
         Grid<FolderStats> grid = new Grid<>();
-        grid.addColumn(fs -> {
-            String indent = "    ".repeat(fs.getDepth());
-            String icon = fs.getDepth() == 0 ? "📁 " : "📂 ";
-            return indent + icon + fs.getFolderName();
-        }).setHeader("Folder").setFlexGrow(2).setSortable(true);
+        grid.addColumn(fs -> "📁 " + fs.getFolderName()
+        ).setHeader("Folder (język)").setFlexGrow(2).setSortable(true);
         grid.addColumn(FolderStats::getLearnedCards).setHeader("Nauczone").setAutoWidth(true).setSortable(true);
         grid.addColumn(FolderStats::getTotalCards).setHeader("Wszystkie").setAutoWidth(true).setSortable(true);
         grid.addColumn(FolderStats::getPercentage).setHeader("Procent").setAutoWidth(true).setSortable(true);
@@ -121,20 +111,27 @@ public class StatsView extends VerticalLayout {
         List<FolderStats> result = new ArrayList<>();
         List<Folder> roots = folderService.getRootFolders(user);
         for (Folder root : roots) {
-            addFolderStats(result, root, user, 0);
+            long total = countCardsRecursive(root);
+            long learned = countLearnedRecursive(root, user);
+            result.add(new FolderStats(root.getName(), total, learned));
         }
         return result;
     }
 
-    private void addFolderStats(List<FolderStats> result, Folder folder, User user, int depth) {
-        long total = flashCardRepository.findByFolderId(folder.getId()).size();
-        long learned = progressRepository.countLearnedByUserAndFolder(user.getId(), folder.getId());
-        result.add(new FolderStats(folder.getName(), total, learned, depth));
-
-        List<Folder> children = folderService.getChildren(folder);
-        for (Folder child : children) {
-            addFolderStats(result, child, user, depth + 1);
+    private long countCardsRecursive(Folder folder) {
+        long count = flashCardRepository.findByFolderId(folder.getId()).size();
+        for (Folder child : folderService.getChildren(folder)) {
+            count += countCardsRecursive(child);
         }
+        return count;
+    }
+
+    private long countLearnedRecursive(Folder folder, User user) {
+        long count = progressRepository.countLearnedByUserAndFolder(user.getId(), folder.getId());
+        for (Folder child : folderService.getChildren(folder)) {
+            count += countLearnedRecursive(child, user);
+        }
+        return count;
     }
 
     private User getCurrentUser() {
