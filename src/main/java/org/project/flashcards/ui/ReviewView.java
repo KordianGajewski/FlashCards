@@ -32,7 +32,8 @@ public class ReviewView extends VerticalLayout {
     private String currentDirection = "EN-PL";
 
     private final Dialog infoDialog = new Dialog(); // Jeden dialog do komunikatów
-    private final HorizontalLayout qualityButtons = new HorizontalLayout();
+    private final HorizontalLayout wrongQualityButtons = new HorizontalLayout();
+    private final HorizontalLayout correctQualityButtons = new HorizontalLayout();
     private final Paragraph scheduleInfo = new Paragraph();
 
     @Autowired
@@ -83,30 +84,45 @@ public class ReviewView extends VerticalLayout {
         scheduleInfo.setText("");
         add(scheduleInfo);
 
-        String[] qualityLabels = {
+        String[] wrongLabels = {
             "0 – brak wiedzy",
             "1 – ach, to to!",
-            "2 – coś świtało",
+            "2 – coś świtało"
+        };
+        for (int q = 0; q <= 2; q++) {
+            int quality = q;
+            Button btn = new Button(wrongLabels[q], e -> submitQuality(quality));
+            btn.getStyle().set("margin", "0.2em");
+            btn.getStyle().set("font-size", "0.85rem");
+            btn.getStyle().set("min-width", "140px");
+            wrongQualityButtons.add(btn);
+        }
+        wrongQualityButtons.setVisible(false);
+        wrongQualityButtons.getStyle().set("flex-wrap", "wrap");
+
+        String[] correctLabels = {
             "3 – z dużym trudem",
             "4 – po chwili namysłu",
             "5 – od razu!"
         };
-        for (int q = 0; q <= 5; q++) {
+        for (int q = 3; q <= 5; q++) {
             int quality = q;
-            Button btn = new Button(qualityLabels[q], e -> submitQuality(quality));
+            Button btn = new Button(correctLabels[q - 3], e -> submitQuality(quality));
             btn.getStyle().set("margin", "0.2em");
             btn.getStyle().set("font-size", "0.85rem");
             btn.getStyle().set("min-width", "140px");
-            qualityButtons.add(btn);
+            correctQualityButtons.add(btn);
         }
-        qualityButtons.setVisible(false);
-        qualityButtons.getStyle().set("flex-wrap", "wrap");
-        add(qualityButtons);
+        correctQualityButtons.setVisible(false);
+        correctQualityButtons.getStyle().set("flex-wrap", "wrap");
+        add(wrongQualityButtons, correctQualityButtons);
     }
 
     private void loadRandomExcluding(Long excludeId) {
         answerField.clear();
         revealBtn.setVisible(false);
+        wrongQualityButtons.setVisible(false);
+        correctQualityButtons.setVisible(false);
         Optional<FlashCard> opt = (excludeId == null)
                 ? game.getRandomLearnedForCurrentUser()
                 : game.getRandomLearnedForCurrentUserExcluding(excludeId);
@@ -144,12 +160,15 @@ public class ReviewView extends VerticalLayout {
         String userAnswer = answerField.getValue().trim().toLowerCase();
         boolean isCorrect = userAnswer.equalsIgnoreCase(correctAnswer.trim().toLowerCase());
         if (isCorrect) {
-            showInfoDialog("✅ Dobrze! Wybierz ocenę 0-5.", 2000);
+            showInfoDialog("✅ Dobrze! Oceń jak dobrze znałeś odpowiedź.", 2000);
+            correctQualityButtons.setVisible(true);
+            wrongQualityButtons.setVisible(false);
         } else {
-            showInfoDialog("❌ Źle. Przypisz jakość i wróci szybciej.", 3000);
+            showInfoDialog("❌ Źle. Oceń jak dobrze znałeś odpowiedź.", 3000);
             revealBtn.setVisible(true);
+            wrongQualityButtons.setVisible(true);
+            correctQualityButtons.setVisible(false);
         }
-        qualityButtons.setVisible(true);
     }
 
     private void submitQuality(int quality) {
@@ -162,7 +181,8 @@ public class ReviewView extends VerticalLayout {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         scheduleInfo.setText("Następna powtórka: " + fmt.format(result.nextReview()) +
                 " | EF: " + String.format("%.2f", result.easinessFactor()));
-        qualityButtons.setVisible(false);
+        wrongQualityButtons.setVisible(false);
+        correctQualityButtons.setVisible(false);
         loadRandomExcluding(current.getId());
     }
 }

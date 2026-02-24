@@ -34,29 +34,42 @@ public class FlashcardGameService {
         this.folderService = folderService;
     }
 
-    /** Zwykły quiz: losuje fiszkę z puli nie-nauczonych. */
+    /**
+     * Quiz: losuje fiszkę do nauki — priorytet: zaplanowane powtórki (due), potem nowe fiszki.
+     * NIE pokazuje fiszek już opanowanych (streak >= 5), chyba że mają zaplanowaną powtórkę.
+     */
     public Optional<FlashCard> getRandomForCurrentUser() {
         User user = getCurrentUserOrThrow();
         return nextDueOrNew(user, Optional.empty());
     }
 
-    /** Zwykły quiz: losuje fiszkę z puli nie-nauczonych z wykluczeniem podanego ID. */
+    /** Quiz: j.w. ale z wykluczeniem podanego ID (żeby nie powtarzać tej samej fiszki). */
     public Optional<FlashCard> getRandomForCurrentUserExcluding(Long excludeId) {
         User user = getCurrentUserOrThrow();
         return nextDueOrNew(user, Optional.ofNullable(excludeId));
     }
 
-    /** Powtórka: losuje fiszkę tylko z puli nauczonych (streak >= 5). */
+    /**
+     * Powtórka: losuje fiszkę TYLKO z puli nauczonych (streak >= 5),
+     * które mają zaplanowaną powtórkę (nextReview <= dziś).
+     */
     public Optional<FlashCard> getRandomLearnedForCurrentUser() {
-        return getRandomForCurrentUser();
+        User user = getCurrentUserOrThrow();
+        return nextLearnedDue(user, Optional.empty());
     }
 
-    /** Powtórka: losuje fiszkę z puli nauczonych z wykluczeniem podanego ID. */
+    /** Powtórka: j.w. z wykluczeniem podanego ID. */
     public Optional<FlashCard> getRandomLearnedForCurrentUserExcluding(Long excludeId) {
-        return getRandomForCurrentUserExcluding(excludeId);
+        User user = getCurrentUserOrThrow();
+        return nextLearnedDue(user, Optional.ofNullable(excludeId));
     }
 
-    /** Sprawdza odpowiedź i aktualizuje streak użytkownika dla danej fiszki. */
+    /**
+     * Sprawdza odpowiedź, aktualizuje streak i planuje następną powtórkę wg SM-2.
+     *
+     * Streak rośnie (max 5) gdy quality >= 3, resetuje się do 0 gdy quality < 3.
+     * Dzięki temu streak jest spójny z oceną SM-2.
+     */
     public ReviewResult checkAndSchedule(Long flashcardId, String userAnswerRaw, int quality) {
         User user = getCurrentUserOrThrow();
         FlashCard fc = flashCardRepository.findById(flashcardId)
@@ -76,7 +89,10 @@ public class FlashcardGameService {
                     return p;
                 });
 
-        if (correctHit) {
+        // Streak bazuje na ocenie quality, nie na oddzielnym sprawdzeniu odpowiedzi.
+        // quality >= 3 = użytkownik uznał, że wiedział → streak rośnie
+        // quality < 3  = użytkownik uznał, że nie wiedział → streak resetuje się
+        if (quality >= 3) {
             progress.setStreak(Math.min(5, progress.getStreak() + 1));
         } else {
             progress.setStreak(0);
@@ -94,10 +110,13 @@ public class FlashcardGameService {
         );
     }
 
+    /**
+     * Quiz: szuka fiszek do nauki.
+     * 1) Fiszki z zaplanowaną powtórką (nextReview <= dziś) — priorytet
+     * 2) Nowe fiszki (bez rekordu progress)
+     */
     private Optional<FlashCard> nextDueOrNew(User user, Optional<Long> excludeId) {
         Set<Long> activeFolderIds = folderService.getActiveFolderIds(user);
-
-        // Jeśli brak aktywnych folderów, nie zwracaj żadnych fiszek
         if (activeFolderIds.isEmpty()) {
             return Optional.empty();
         }
@@ -129,6 +148,23 @@ public class FlashcardGameService {
                     .findFirst();
         }
         return Optional.empty();
+    }
+
+    /**
+     * Powtórka: szuka fiszek nauczonych (streak >= 5) z zaplanowaną powtórką (nextReview <= dziś).
+     */
+    private Optional<FlashCard> nextLearnedDue(User user, Optional<Long> excludeId) {
+        Set<Long> activeFolderIds = folderService.getActiveFolderIds(user);
+        if (activeFolderIds.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<UserFlashcardProgress> learnedDue = progressRepository.findLearnedDueInFolders(
+                user.getId(), LocalDate.now(), activeFolderIds);
+        return learnedDue.stream()
+                .map(UserFlashcardProgress::getFlashcard)
+                .filter(fc -> excludeId.map(id -> !Objects.equals(fc.getId(), id)).orElse(true))
+                .findFirst();
     }
 
     // ===== helpers =====

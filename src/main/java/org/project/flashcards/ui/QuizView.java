@@ -35,7 +35,8 @@ public class QuizView extends VerticalLayout {
     private final RadioButtonGroup<String> modeSelect = new RadioButtonGroup<>();
     private String quizMode = "EN-PL"; // domyślnie angielski->polski
     private String currentDirection = "EN-PL"; // kierunek dla bieżącej fiszki
-    private final HorizontalLayout qualityButtons = new HorizontalLayout();
+    private final HorizontalLayout wrongQualityButtons = new HorizontalLayout();
+    private final HorizontalLayout correctQualityButtons = new HorizontalLayout();
     private final Paragraph scheduleInfo = new Paragraph();
 
     @Autowired
@@ -109,26 +110,39 @@ public class QuizView extends VerticalLayout {
         scheduleInfo.getStyle().set("font-size", "0.9rem");
         scheduleInfo.setText("");
 
-        String[] qualityLabels = {
+        String[] wrongLabels = {
             "0 – brak wiedzy",
             "1 – ach, to to!",
-            "2 – coś świtało",
+            "2 – coś świtało"
+        };
+        for (int q = 0; q <= 2; q++) {
+            int quality = q;
+            Button btn = new Button(wrongLabels[q], e -> submitQuality(quality));
+            btn.getStyle().set("margin", "0.2em");
+            btn.getStyle().set("font-size", "0.85rem");
+            btn.getStyle().set("min-width", "140px");
+            wrongQualityButtons.add(btn);
+        }
+        wrongQualityButtons.setVisible(false);
+        wrongQualityButtons.getStyle().set("flex-wrap", "wrap");
+
+        String[] correctLabels = {
             "3 – z dużym trudem",
             "4 – po chwili namysłu",
             "5 – od razu!"
         };
-        for (int q = 0; q <= 5; q++) {
+        for (int q = 3; q <= 5; q++) {
             int quality = q;
-            Button btn = new Button(qualityLabels[q], e -> submitQuality(quality));
+            Button btn = new Button(correctLabels[q - 3], e -> submitQuality(quality));
             btn.getStyle().set("margin", "0.2em");
             btn.getStyle().set("font-size", "0.85rem");
             btn.getStyle().set("min-width", "140px");
-            qualityButtons.add(btn);
+            correctQualityButtons.add(btn);
         }
-        qualityButtons.setVisible(false);
-        qualityButtons.getStyle().set("flex-wrap", "wrap");
+        correctQualityButtons.setVisible(false);
+        correctQualityButtons.getStyle().set("flex-wrap", "wrap");
 
-        add(scheduleInfo, qualityButtons);
+        add(scheduleInfo, wrongQualityButtons, correctQualityButtons);
 
         loadRandomExcluding(null);
     }
@@ -137,6 +151,8 @@ public class QuizView extends VerticalLayout {
         feedback.setText("");
         answerField.clear();
         revealBtn.setVisible(false);
+        wrongQualityButtons.setVisible(false);
+        correctQualityButtons.setVisible(false);
         Optional<FlashCard> opt = (excludeId == null)
                 ? game.getRandomForCurrentUser()
                 : game.getRandomForCurrentUserExcluding(excludeId);
@@ -172,12 +188,14 @@ public class QuizView extends VerticalLayout {
         String userAnswer = answerField.getValue().trim().toLowerCase();
         boolean isCorrect = userAnswer.equalsIgnoreCase(correctAnswer.trim().toLowerCase());
         if (isCorrect) {
-            Notification.show("✅ Dobrze! Wybierz ocenę 0-5.", 3000, Notification.Position.MIDDLE);
-            qualityButtons.setVisible(true);
+            Notification.show("✅ Dobrze! Oceń jak dobrze znałeś odpowiedź.", 3000, Notification.Position.MIDDLE);
+            correctQualityButtons.setVisible(true);
+            wrongQualityButtons.setVisible(false);
         } else {
-            Notification.show("❌ Źle. Nadaj jakość i powtarzamy.", 3000, Notification.Position.MIDDLE);
+            Notification.show("❌ Źle. Oceń jak dobrze znałeś odpowiedź.", 3000, Notification.Position.MIDDLE);
             revealBtn.setVisible(true);
-            qualityButtons.setVisible(true);
+            wrongQualityButtons.setVisible(true);
+            correctQualityButtons.setVisible(false);
         }
     }
 
@@ -191,7 +209,8 @@ public class QuizView extends VerticalLayout {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         scheduleInfo.setText("Następna powtórka: " + fmt.format(result.nextReview()) +
                 " | EF: " + String.format("%.2f", result.easinessFactor()));
-        qualityButtons.setVisible(false);
+        wrongQualityButtons.setVisible(false);
+        correctQualityButtons.setVisible(false);
         loadRandomExcluding(current.getId());
     }
 

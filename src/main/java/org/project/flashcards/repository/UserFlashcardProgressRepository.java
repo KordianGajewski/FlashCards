@@ -81,4 +81,17 @@ public interface UserFlashcardProgressRepository extends JpaRepository<UserFlash
           and p.flashcard.folder.id = :folderId
         """)
     long countLearnedByUserAndFolder(@Param("userId") Long userId, @Param("folderId") Long folderId);
+
+    @Query("""
+        select p from UserFlashcardProgress p
+        join fetch p.flashcard fc
+        where p.user.id = :userId
+          and p.streak >= 5
+          and p.nextReview <= :today
+          and fc.folder.id in :folderIds
+        order by p.nextReview asc
+        """)
+    List<UserFlashcardProgress> findLearnedDueInFolders(@Param("userId") Long userId,
+                                                        @Param("today") LocalDate today,
+                                                        @Param("folderIds") Collection<Long> folderIds);
 }
