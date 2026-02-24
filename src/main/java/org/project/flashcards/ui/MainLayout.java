@@ -26,7 +26,8 @@ public class MainLayout extends AppLayout {
 
         // Linki nawigacyjne
         RouterLink quizLink   = new RouterLink("Quiz",     QuizView.class);
-        RouterLink reviewLink = new RouterLink("Powtórka", ReviewView.class);  // <-- NOWE
+        RouterLink reviewLink = new RouterLink("Powtórka", ReviewView.class);
+        RouterLink statsLink  = new RouterLink("Statystyki", StatsView.class);
         RouterLink adminLink  = new RouterLink("Admin",    AdminView.class);
         RouterLink userLink = new RouterLink("Moje fiszki", UserView.class);
 
@@ -51,8 +52,9 @@ public class MainLayout extends AppLayout {
                 title,
                 quizLink,
                 reviewLink,
+                statsLink,
                 adminLink,
-                userLink, // <-- NOWE w navbarze
+                userLink,
                 spacer,
                 userSpan,
                 logoutBtn
