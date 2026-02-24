@@ -1,6 +1,7 @@
 package org.project.flashcards.service;
 
 import org.project.flashcards.entity.FlashCard;
+import org.project.flashcards.entity.Folder;
 import org.project.flashcards.entity.User;
 import org.project.flashcards.repository.FlashCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class RandomWordService {
         return word.replaceAll("[^a-z]", "").toLowerCase();
     }
 
-    public int importRandomWords(int count, User owner) {
+    public int importRandomWords(int count, User owner, Folder folder) {
         String url = "https://random-word-api.herokuapp.com/word?number=" + count;
         String[] words = restTemplate.getForObject(url, String[].class);
         if (words == null) return 0;
@@ -72,7 +73,7 @@ public class RandomWordService {
             if (translation != null) {
                 // Odpowiedź: tylko małe litery, polskie znaki, bez znaków interpunkcyjnych
                 translation = translation.replaceAll("[\\p{Punct}]", "").toLowerCase();
-                FlashCard card = new FlashCard(cleaned, translation, owner);
+                FlashCard card = new FlashCard(cleaned, translation, owner, folder);
                 flashCardRepository.save(card);
                 imported++;
             } else {

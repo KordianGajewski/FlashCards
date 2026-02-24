@@ -20,15 +20,18 @@ public class FlashcardGameService {
     private final UserFlashcardProgressRepository progressRepository;
     private final UserRepository userRepository;
     private final Sm2Scheduler sm2Scheduler;
+    private final FolderService folderService;
 
     public FlashcardGameService(FlashCardRepository flashCardRepository,
                                 UserFlashcardProgressRepository progressRepository,
                                 UserRepository userRepository,
-                                Sm2Scheduler sm2Scheduler) {
+                                Sm2Scheduler sm2Scheduler,
+                                FolderService folderService) {
         this.flashCardRepository = flashCardRepository;
         this.progressRepository = progressRepository;
         this.userRepository = userRepository;
         this.sm2Scheduler = sm2Scheduler;
+        this.folderService = folderService;
     }
 
     /** Zwykły quiz: losuje fiszkę z puli nie-nauczonych. */
@@ -92,7 +95,15 @@ public class FlashcardGameService {
     }
 
     private Optional<FlashCard> nextDueOrNew(User user, Optional<Long> excludeId) {
-        List<UserFlashcardProgress> due = progressRepository.findDueProgress(user.getId(), LocalDate.now());
+        Set<Long> activeFolderIds = folderService.getActiveFolderIds(user);
+
+        // Jeśli brak aktywnych folderów, nie zwracaj żadnych fiszek
+        if (activeFolderIds.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<UserFlashcardProgress> due = progressRepository.findDueProgressInFolders(
+                user.getId(), LocalDate.now(), activeFolderIds);
         Optional<FlashCard> fromDue = due.stream()
                 .map(UserFlashcardProgress::getFlashcard)
                 .filter(fc -> excludeId.map(id -> !Objects.equals(fc.getId(), id)).orElse(true))
@@ -101,7 +112,7 @@ public class FlashcardGameService {
             return fromDue;
         }
 
-        List<FlashCard> newCards = progressRepository.findNewForUser(user.getId());
+        List<FlashCard> newCards = progressRepository.findNewForUserInFolders(user.getId(), activeFolderIds);
         if (!newCards.isEmpty()) {
             List<FlashCard> filtered = excludeId
                     .map(id -> newCards.stream().filter(fc -> !Objects.equals(fc.getId(), id)).toList())

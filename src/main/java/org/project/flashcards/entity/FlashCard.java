@@ -24,6 +24,10 @@ public class FlashCard {
     @JoinColumn(name = "owner_id")
     private User owner;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "folder_id")
+    private Folder folder;
+
     public FlashCard(String question, String answer) {
         this.question = question;
         this.answer = answer;
@@ -33,5 +37,12 @@ public class FlashCard {
         this.question = question;
         this.answer = answer;
         this.owner = owner;
+    }
+
+    public FlashCard(String question, String answer, User owner, Folder folder) {
+        this.question = question;
+        this.answer = answer;
+        this.owner = owner;
+        this.folder = folder;
     }
 }
