@@ -115,7 +115,10 @@ public class UserView extends VerticalLayout {
         tipContent.getStyle()
                 .set("font-size", "0.85em")
                 .set("line-height", "1.6")
-                .set("color", "#444");
+                .set("color", "#444")
+                .set("overflow", "visible")
+                .set("max-height", "none")
+                .set("word-wrap", "break-word");
 
         tipContent.add(
                 new Paragraph("➕ Twórz foldery o nazwach języków obcych, np. Angielski, Niemiecki."),
@@ -144,7 +147,8 @@ public class UserView extends VerticalLayout {
                 .set("border", "1px solid #c5d9f0")
                 .set("width", "100%")
                 .set("box-sizing", "border-box")
-                .set("overflow", "hidden");
+                .set("overflow", "visible")
+                .set("flex-shrink", "0");
 
         Button addRootFolderBtn = new Button("➕ Nowy folder", e -> showAddFolderDialog(null));
         addRootFolderBtn.getStyle().set("background", "#3a7bd5");
@@ -226,6 +230,7 @@ public class UserView extends VerticalLayout {
         panel.add(folderHeader, tipDetails, folderButtons1, folderButtons2, folderTree);
         panel.setFlexGrow(1, folderTree);
         panel.setHeightFull();
+        panel.getStyle().set("overflow-y", "auto");
         return panel;
     }
 

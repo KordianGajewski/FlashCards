@@ -256,6 +256,7 @@ public class AdminView extends VerticalLayout {
         panel.add(folderHeader, folderButtons1, folderButtons2, folderTree);
         panel.setFlexGrow(1, folderTree);
         panel.setHeightFull();
+        panel.getStyle().set("overflow-y", "auto");
         return panel;
     }
 
