@@ -118,7 +118,7 @@ public class UserView extends VerticalLayout {
                 .set("color", "#444");
 
         tipContent.add(
-                new Paragraph("📁 Twórz foldery o nazwach języków obcych, np. Angielski, Niemiecki."),
+                new Paragraph("➕ Twórz foldery o nazwach języków obcych, np. Angielski, Niemiecki."),
                 new Paragraph("📂 Podfoldery mogą służyć do podziału na części mowy " +
                         "(rzeczowniki, czasowniki) lub działy tematyczne (praca, dom, podróże)."),
                 new Paragraph("✅ Zaznacz folder jako aktywny, aby jego fiszki pojawiały się w quizie i powtórkach."),
@@ -142,7 +142,9 @@ public class UserView extends VerticalLayout {
                 .set("padding", "0.5em 0.8em")
                 .set("margin-bottom", "0.3em")
                 .set("border", "1px solid #c5d9f0")
-                .set("width", "100%");
+                .set("width", "100%")
+                .set("box-sizing", "border-box")
+                .set("overflow", "hidden");
 
         Button addRootFolderBtn = new Button("➕ Nowy folder", e -> showAddFolderDialog(null));
         addRootFolderBtn.getStyle().set("background", "#3a7bd5");
