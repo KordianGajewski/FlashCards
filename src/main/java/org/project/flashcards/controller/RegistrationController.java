@@ -13,10 +13,11 @@ public class RegistrationController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<?> register(@RequestParam String email, @RequestParam String password,
+    public ResponseEntity<?> register(@RequestParam String email, @RequestParam String username,
+                                      @RequestParam String password,
                                       @RequestParam String firstName, @RequestParam String lastName) {
         try {
-            userService.registerUser(email, password, firstName, lastName);
+            userService.registerUser(email, username, password, firstName, lastName);
             return ResponseEntity.ok("Rejestracja zakończona sukcesem. Możesz się zalogować.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

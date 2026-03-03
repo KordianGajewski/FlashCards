@@ -17,17 +17,20 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void registerUser(String email, String password, String firstName, String lastName) {
+    public void registerUser(String email, String username, String password, String firstName, String lastName) {
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new IllegalArgumentException("Ten email jest już zajęty");
+        }
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new IllegalArgumentException("Ta nazwa użytkownika jest już zajęta");
         }
         User user = new User();
         user.setEmail(email);
-        user.setUsername(email);
+        user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setFirstName(firstName);
         user.setLastName(lastName);
-        user.setEnabled(true); // Użytkownik jest od razu aktywowany
+        user.setEnabled(true);
         userRepository.save(user);
     }
 

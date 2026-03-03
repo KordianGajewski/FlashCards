@@ -32,6 +32,7 @@ public class RegisterView extends VerticalLayout {
 
         H1 title = new H1("Rejestracja");
         EmailField email = new EmailField("Email");
+        TextField username = new TextField("Nazwa użytkownika");
         TextField firstName = new TextField("Imię");
         TextField lastName = new TextField("Nazwisko");
         PasswordField password = new PasswordField("Hasło");
@@ -44,6 +45,10 @@ public class RegisterView extends VerticalLayout {
         registerBtn.addClickListener(e -> {
             if (email.getValue().isBlank()) {
                 Notification.show("Email jest wymagany");
+                return;
+            }
+            if (username.getValue().isBlank()) {
+                Notification.show("Nazwa użytkownika jest wymagana");
                 return;
             }
             if (firstName.getValue().isBlank() || lastName.getValue().isBlank()) {
@@ -61,6 +66,7 @@ public class RegisterView extends VerticalLayout {
             try {
                 userService.registerUser(
                         email.getValue(),
+                        username.getValue(),
                         password.getValue(),
                         firstName.getValue(),
                         lastName.getValue()
@@ -74,6 +80,6 @@ public class RegisterView extends VerticalLayout {
             }
         });
 
-        add(title, email, firstName, lastName, password, confirmPassword, registerBtn, backToLoginBtn);
+        add(title, email, username, firstName, lastName, password, confirmPassword, registerBtn, backToLoginBtn);
     }
 }
