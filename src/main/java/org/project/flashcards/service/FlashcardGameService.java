@@ -98,6 +98,11 @@ public class FlashcardGameService {
             progress.setStreak(0);
         }
 
+        // Zapamiętaj, że fiszka kiedykolwiek była nauczona
+        if (progress.getStreak() >= 5) {
+            progress.setEverLearned(true);
+        }
+
         sm2Scheduler.applyQuality(progress, quality);
         progressRepository.save(progress);
 

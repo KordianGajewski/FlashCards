@@ -42,11 +42,31 @@ public class UserFlashcardProgress {
 
     private LocalDateTime lastReviewedAt;
 
+    /** Data pierwszej powtórki — potrzebna do obliczenia czasu nauki fiszki. */
+    private LocalDateTime firstReviewedAt;
+
     private Integer lastQuality;
+
+    /** Flaga: czy fiszka kiedykolwiek osiągnęła status „nauczona" (streak >= 5). */
+    @Column(nullable = false)
+    private boolean everLearned = false;
+
+    /** Ile razy fiszka była łącznie oceniana (potrzebne do statystyk). */
+    @Column(nullable = false)
+    private int totalReviews = 0;
+
+    /** Suma wszystkich ocen quality — do obliczania średniej oceny. */
+    @Column(nullable = false)
+    private int qualitySum = 0;
 
     @Transient
     public boolean isLearned() {
         return streak >= 5;
+    }
+
+    @Transient
+    public double getAverageQuality() {
+        return totalReviews > 0 ? (double) qualitySum / totalReviews : 0.0;
     }
 
     @PrePersist

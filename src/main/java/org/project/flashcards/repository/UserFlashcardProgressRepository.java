@@ -94,4 +94,22 @@ public interface UserFlashcardProgressRepository extends JpaRepository<UserFlash
     List<UserFlashcardProgress> findLearnedDueInFolders(@Param("userId") Long userId,
                                                         @Param("today") LocalDate today,
                                                         @Param("folderIds") Collection<Long> folderIds);
+
+    /** Wszystkie rekordy postępu użytkownika w podanych folderach. */
+    @Query("""
+        select p from UserFlashcardProgress p
+        join fetch p.flashcard fc
+        where p.user.id = :userId
+          and fc.folder.id in :folderIds
+        """)
+    List<UserFlashcardProgress> findAllByUserAndFolders(@Param("userId") Long userId,
+                                                        @Param("folderIds") Collection<Long> folderIds);
+
+    /** Liczba fiszek do powtórki dziś (globalnie). */
+    @Query("""
+        select count(p) from UserFlashcardProgress p
+        where p.user.id = :userId
+          and p.nextReview <= :today
+        """)
+    long countDueByUserAndDate(@Param("userId") Long userId, @Param("today") LocalDate today);
 }

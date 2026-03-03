@@ -45,6 +45,13 @@ public class Sm2Scheduler {
         progress.setNextReview(LocalDate.now().plusDays(interval));
         progress.setLastReviewedAt(LocalDateTime.now());
         progress.setLastQuality(quality);
+
+        // Statystyki rozszerzone
+        if (progress.getFirstReviewedAt() == null) {
+            progress.setFirstReviewedAt(LocalDateTime.now());
+        }
+        progress.setTotalReviews(progress.getTotalReviews() + 1);
+        progress.setQualitySum(progress.getQualitySum() + quality);
     }
 }
 
