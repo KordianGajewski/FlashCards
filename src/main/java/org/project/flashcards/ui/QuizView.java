@@ -33,7 +33,7 @@ public class QuizView extends VerticalLayout {
     private final Button nextBtn = new Button("Następna");
     private final Paragraph feedback = new Paragraph();
     private final RadioButtonGroup<String> modeSelect = new RadioButtonGroup<>();
-    private String quizMode = "EN-PL"; // domyślnie angielski->polski
+    private String quizMode = "EN-PL"; // domyślnie obcy->polski
     private String currentDirection = "EN-PL"; // kierunek dla bieżącej fiszki
     private final HorizontalLayout wrongQualityButtons = new HorizontalLayout();
     private final HorizontalLayout correctQualityButtons = new HorizontalLayout();
@@ -89,12 +89,12 @@ public class QuizView extends VerticalLayout {
         actions.getStyle().set("flex-wrap", "wrap").set("gap", "0.3em");
         add(header, flashcardDiv, answerField, actions, feedback);
 
-        modeSelect.setItems("angielski → polski", "polski → angielski", "losowo");
-        modeSelect.setValue("angielski → polski");
+        modeSelect.setItems("obcy → polski", "polski → obcy", "losowo");
+        modeSelect.setValue("obcy → polski");
         modeSelect.addValueChangeListener(e -> {
             switch (e.getValue()) {
-                case "angielski → polski" -> quizMode = "EN-PL";
-                case "polski → angielski" -> quizMode = "PL-EN";
+                case "obcy → polski" -> quizMode = "EN-PL";
+                case "polski → obcy" -> quizMode = "PL-EN";
                 case "losowo" -> quizMode = "RANDOM";
             }
             loadRandomExcluding(null);
@@ -187,7 +187,7 @@ public class QuizView extends VerticalLayout {
             header.setText("Podaj polskie tłumaczenie");
             flashcardDiv.setText(nullSafe(current.getQuestion()));
         } else {
-            header.setText("Podaj angielskie tłumaczenie");
+            header.setText("Podaj obce tłumaczenie");
             flashcardDiv.setText(nullSafe(current.getAnswer()));
         }
         checkBtn.setEnabled(true); // Aktywuj przycisk po załadowaniu nowego pytania

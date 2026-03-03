@@ -142,7 +142,7 @@ public class ReviewView extends VerticalLayout {
         if (mode.equals("EN-PL")) {
             question.setText("Podaj polskie tłumaczenie: " + (current.getQuestion() == null ? "" : current.getQuestion()));
         } else {
-            question.setText("Podaj angielskie tłumaczenie: " + (current.getAnswer() == null ? "" : current.getAnswer()));
+            question.setText("Podaj obce tłumaczenie: " + (current.getAnswer() == null ? "" : current.getAnswer()));
         }
         checkBtn.setEnabled(true); // Aktywuj przycisk po załadowaniu nowego pytania
         nextBtn.setEnabled(true);

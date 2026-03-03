@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
@@ -137,20 +138,27 @@ public class AdminView extends VerticalLayout {
 
         // Lewy panel: foldery
         VerticalLayout folderPanel = buildFolderPanel();
-        folderPanel.setWidth("100%");
-        folderPanel.setMaxWidth("350px");
-        folderPanel.setMinWidth("200px");
+        folderPanel.setWidth("300px");
+        folderPanel.setMinWidth("250px");
+        folderPanel.getStyle().set("flex", "0 0 300px");
 
         // Prawy panel: fiszki
         VerticalLayout cardsPanel = buildCardsPanel();
+        cardsPanel.getStyle()
+                .set("flex", "1 1 300px")
+                .set("min-width", "0");
 
-        HorizontalLayout content = new HorizontalLayout(folderPanel, cardsPanel);
-        content.setSizeFull();
-        content.setFlexGrow(0, folderPanel);
-        content.setFlexGrow(1, cardsPanel);
-        content.getStyle().set("flex-wrap", "wrap");
+        Div content = new Div(folderPanel, cardsPanel);
+        content.getStyle()
+                .set("display", "flex")
+                .set("flex-wrap", "wrap")
+                .set("gap", "0.5em")
+                .set("width", "100%")
+                .set("height", "100%")
+                .set("min-height", "0");
 
         page.add(content);
+        content.getStyle().set("flex-grow", "1");
         page.setFlexGrow(1, content);
         return page;
     }
@@ -247,7 +255,7 @@ public class AdminView extends VerticalLayout {
 
         panel.add(folderHeader, folderButtons1, folderButtons2, folderTree);
         panel.setFlexGrow(1, folderTree);
-        panel.setSizeFull();
+        panel.setHeightFull();
         return panel;
     }
 
@@ -255,7 +263,8 @@ public class AdminView extends VerticalLayout {
         VerticalLayout panel = new VerticalLayout();
         panel.setPadding(false);
         panel.setSpacing(true);
-        panel.setSizeFull();
+        panel.setWidthFull();
+        panel.setHeightFull();
 
         selectedFolderLabel.getStyle().set("font-weight", "600");
         selectedFolderLabel.getStyle().set("color", "#3a7bd5");

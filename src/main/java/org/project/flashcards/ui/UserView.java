@@ -2,11 +2,10 @@ package org.project.flashcards.ui;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -68,21 +67,29 @@ public class UserView extends VerticalLayout {
 
         // === LEWY PANEL: Drzewo folderów ===
         VerticalLayout folderPanel = buildFolderPanel();
-        folderPanel.setWidth("100%");
-        folderPanel.setMaxWidth("350px");
-        folderPanel.setMinWidth("200px");
+        folderPanel.setWidth("300px");
+        folderPanel.setMinWidth("250px");
+        folderPanel.getStyle()
+                .set("flex", "0 0 300px");
 
         // === PRAWY PANEL: Fiszki ===
         VerticalLayout cardsPanel = buildCardsPanel();
+        cardsPanel.getStyle()
+                .set("flex", "1 1 300px")
+                .set("min-width", "0");
 
-        HorizontalLayout mainContent = new HorizontalLayout(folderPanel, cardsPanel);
-        mainContent.setSizeFull();
-        mainContent.setFlexGrow(0, folderPanel);
-        mainContent.setFlexGrow(1, cardsPanel);
-        mainContent.getStyle().set("flex-wrap", "wrap");
+        Div mainContent = new Div(folderPanel, cardsPanel);
+        mainContent.getStyle()
+                .set("display", "flex")
+                .set("flex-wrap", "wrap")
+                .set("gap", "0.5em")
+                .set("width", "100%")
+                .set("height", "100%")
+                .set("min-height", "0");
 
         add(header, mainContent);
         setFlexGrow(1, mainContent);
+        mainContent.getStyle().set("flex-grow", "1");
 
         loadFolderTree();
         updateCardButtonState();
@@ -102,6 +109,40 @@ public class UserView extends VerticalLayout {
         H4 folderHeader = new H4("\uD83D\uDCC1 Foldery");
         folderHeader.getStyle().set("color", "#3a7bd5");
         folderHeader.getStyle().set("margin", "0");
+
+        // --- Tutorial / wskazówki ---
+        Div tipContent = new Div();
+        tipContent.getStyle()
+                .set("font-size", "0.85em")
+                .set("line-height", "1.6")
+                .set("color", "#444");
+
+        tipContent.add(
+                new Paragraph("📁 Twórz foldery o nazwach języków obcych, np. Angielski, Niemiecki."),
+                new Paragraph("📂 Podfoldery mogą służyć do podziału na części mowy " +
+                        "(rzeczowniki, czasowniki) lub działy tematyczne (praca, dom, podróże)."),
+                new Paragraph("✅ Zaznacz folder jako aktywny, aby jego fiszki pojawiały się w quizie i powtórkach."),
+                new Paragraph("🃏 Fiszki dodajesz z poziomu wybranego folderu lub podfolderu — " +
+                        "kliknij folder w drzewie, a następnie użyj formularza po prawej stronie.")
+        );
+        tipContent.getChildren().forEach(c ->
+                c.getElement().getStyle().set("margin", "0.2em 0"));
+
+        Span tipSummary = new Span("ℹ\uFE0F  Jak organizować fiszki?");
+        tipSummary.getStyle()
+                .set("font-weight", "600")
+                .set("color", "#3a7bd5")
+                .set("cursor", "pointer");
+
+        Details tipDetails = new Details(tipSummary, tipContent);
+        tipDetails.setOpened(false);
+        tipDetails.getStyle()
+                .set("background", "#eaf2fb")
+                .set("border-radius", "8px")
+                .set("padding", "0.5em 0.8em")
+                .set("margin-bottom", "0.3em")
+                .set("border", "1px solid #c5d9f0")
+                .set("width", "100%");
 
         Button addRootFolderBtn = new Button("➕ Nowy folder", e -> showAddFolderDialog(null));
         addRootFolderBtn.getStyle().set("background", "#3a7bd5");
@@ -180,9 +221,9 @@ public class UserView extends VerticalLayout {
         folderTree.getStyle().set("background", "#f9fafc");
         folderTree.getStyle().set("border-radius", "6px");
 
-        panel.add(folderHeader, folderButtons1, folderButtons2, folderTree);
+        panel.add(folderHeader, tipDetails, folderButtons1, folderButtons2, folderTree);
         panel.setFlexGrow(1, folderTree);
-        panel.setSizeFull();
+        panel.setHeightFull();
         return panel;
     }
 
@@ -192,7 +233,8 @@ public class UserView extends VerticalLayout {
         VerticalLayout panel = new VerticalLayout();
         panel.setPadding(false);
         panel.setSpacing(true);
-        panel.setSizeFull();
+        panel.setWidthFull();
+        panel.setHeightFull();
 
         selectedFolderLabel.getStyle().set("font-weight", "600");
         selectedFolderLabel.getStyle().set("color", "#3a7bd5");
