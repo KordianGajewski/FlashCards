@@ -48,6 +48,7 @@ public class ReviewView extends VerticalLayout {
         getStyle().set("color", "#2d3a4a");
         revealBtn.setVisible(false);
         HorizontalLayout actions = new HorizontalLayout(checkBtn, revealBtn, nextBtn);
+        actions.getStyle().set("flex-wrap", "wrap").set("gap", "0.3em");
         H2 header = new H2("Powtórka – znane słówka");
         header.getStyle().set("color", "#3a7bd5");
         header.getStyle().set("font-weight", "600");
@@ -93,12 +94,13 @@ public class ReviewView extends VerticalLayout {
             int quality = q;
             Button btn = new Button(wrongLabels[q], e -> submitQuality(quality));
             btn.getStyle().set("margin", "0.2em");
-            btn.getStyle().set("font-size", "0.85rem");
-            btn.getStyle().set("min-width", "140px");
+            btn.getStyle().set("font-size", "clamp(0.7rem, 2.5vw, 0.85rem)");
+            btn.getStyle().set("min-width", "0");
+            btn.getStyle().set("white-space", "nowrap");
             wrongQualityButtons.add(btn);
         }
         wrongQualityButtons.setVisible(false);
-        wrongQualityButtons.getStyle().set("flex-wrap", "wrap");
+        wrongQualityButtons.getStyle().set("flex-wrap", "wrap").set("justify-content", "center");
 
         String[] correctLabels = {
             "3 – z dużym trudem",
@@ -109,12 +111,13 @@ public class ReviewView extends VerticalLayout {
             int quality = q;
             Button btn = new Button(correctLabels[q - 3], e -> submitQuality(quality));
             btn.getStyle().set("margin", "0.2em");
-            btn.getStyle().set("font-size", "0.85rem");
-            btn.getStyle().set("min-width", "140px");
+            btn.getStyle().set("font-size", "clamp(0.7rem, 2.5vw, 0.85rem)");
+            btn.getStyle().set("min-width", "0");
+            btn.getStyle().set("white-space", "nowrap");
             correctQualityButtons.add(btn);
         }
         correctQualityButtons.setVisible(false);
-        correctQualityButtons.getStyle().set("flex-wrap", "wrap");
+        correctQualityButtons.getStyle().set("flex-wrap", "wrap").set("justify-content", "center");
         add(wrongQualityButtons, correctQualityButtons);
     }
 

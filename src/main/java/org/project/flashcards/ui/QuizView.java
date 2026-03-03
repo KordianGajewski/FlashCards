@@ -54,11 +54,14 @@ public class QuizView extends VerticalLayout {
         header.getStyle().set("color", "#3a7bd5");
         header.getStyle().set("font-weight", "600");
         header.getStyle().set("text-shadow", "0 2px 8px #c3cfe2");
-        header.getStyle().set("margin-bottom", "1.5em");
+        header.getStyle().set("margin-bottom", "1em");
+        header.getStyle().set("font-size", "clamp(1.1rem, 4vw, 1.5rem)");
+        header.getStyle().set("text-align", "center");
         header.setText("Podaj polskie tłumaczenie");
 
         // Fiszka - duży kwadrat z wyśrodkowanym słówkiem
-        flashcardDiv.setWidth("320px");
+        flashcardDiv.setWidthFull();
+        flashcardDiv.setMaxWidth("320px");
         flashcardDiv.setHeight("180px");
         flashcardDiv.getStyle().set("background", "#e3eafc");
         flashcardDiv.getStyle().set("border-radius", "24px");
@@ -66,16 +69,24 @@ public class QuizView extends VerticalLayout {
         flashcardDiv.getStyle().set("display", "flex");
         flashcardDiv.getStyle().set("align-items", "center");
         flashcardDiv.getStyle().set("justify-content", "center");
-        flashcardDiv.getStyle().set("font-size", "2.5rem");
+        flashcardDiv.getStyle().set("font-size", "clamp(1.4rem, 6vw, 2.5rem)");
         flashcardDiv.getStyle().set("font-weight", "bold");
         flashcardDiv.getStyle().set("color", "#2d3a4a");
-        flashcardDiv.getStyle().set("margin-bottom", "2em");
+        flashcardDiv.getStyle().set("margin-bottom", "1.5em");
+        flashcardDiv.getStyle().set("padding", "0.5em");
+        flashcardDiv.getStyle().set("word-break", "break-word");
+        flashcardDiv.getStyle().set("text-align", "center");
+        flashcardDiv.getStyle().set("box-sizing", "border-box");
         flashcardDiv.setText("");
+
+        answerField.setWidthFull();
+        answerField.setMaxWidth("320px");
 
         revealBtn.setVisible(false); // ukryte dopóki nie ma błędu
 
         HorizontalLayout actions = new HorizontalLayout(checkBtn, revealBtn, nextBtn);
         actions.setJustifyContentMode(JustifyContentMode.CENTER);
+        actions.getStyle().set("flex-wrap", "wrap").set("gap", "0.3em");
         add(header, flashcardDiv, answerField, actions, feedback);
 
         modeSelect.setItems("angielski → polski", "polski → angielski", "losowo");
@@ -119,12 +130,13 @@ public class QuizView extends VerticalLayout {
             int quality = q;
             Button btn = new Button(wrongLabels[q], e -> submitQuality(quality));
             btn.getStyle().set("margin", "0.2em");
-            btn.getStyle().set("font-size", "0.85rem");
-            btn.getStyle().set("min-width", "140px");
+            btn.getStyle().set("font-size", "clamp(0.7rem, 2.5vw, 0.85rem)");
+            btn.getStyle().set("min-width", "0");
+            btn.getStyle().set("white-space", "nowrap");
             wrongQualityButtons.add(btn);
         }
         wrongQualityButtons.setVisible(false);
-        wrongQualityButtons.getStyle().set("flex-wrap", "wrap");
+        wrongQualityButtons.getStyle().set("flex-wrap", "wrap").set("justify-content", "center");
 
         String[] correctLabels = {
             "3 – z dużym trudem",
@@ -135,12 +147,13 @@ public class QuizView extends VerticalLayout {
             int quality = q;
             Button btn = new Button(correctLabels[q - 3], e -> submitQuality(quality));
             btn.getStyle().set("margin", "0.2em");
-            btn.getStyle().set("font-size", "0.85rem");
-            btn.getStyle().set("min-width", "140px");
+            btn.getStyle().set("font-size", "clamp(0.7rem, 2.5vw, 0.85rem)");
+            btn.getStyle().set("min-width", "0");
+            btn.getStyle().set("white-space", "nowrap");
             correctQualityButtons.add(btn);
         }
         correctQualityButtons.setVisible(false);
-        correctQualityButtons.getStyle().set("flex-wrap", "wrap");
+        correctQualityButtons.getStyle().set("flex-wrap", "wrap").set("justify-content", "center");
 
         add(scheduleInfo, wrongQualityButtons, correctQualityButtons);
 

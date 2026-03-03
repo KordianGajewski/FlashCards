@@ -68,8 +68,9 @@ public class UserView extends VerticalLayout {
 
         // === LEWY PANEL: Drzewo folderów ===
         VerticalLayout folderPanel = buildFolderPanel();
-        folderPanel.setWidth("350px");
-        folderPanel.setMinWidth("280px");
+        folderPanel.setWidth("100%");
+        folderPanel.setMaxWidth("350px");
+        folderPanel.setMinWidth("200px");
 
         // === PRAWY PANEL: Fiszki ===
         VerticalLayout cardsPanel = buildCardsPanel();
@@ -78,6 +79,7 @@ public class UserView extends VerticalLayout {
         mainContent.setSizeFull();
         mainContent.setFlexGrow(0, folderPanel);
         mainContent.setFlexGrow(1, cardsPanel);
+        mainContent.getStyle().set("flex-wrap", "wrap");
 
         add(header, mainContent);
         setFlexGrow(1, mainContent);
@@ -145,8 +147,10 @@ public class UserView extends VerticalLayout {
 
         HorizontalLayout folderButtons1 = new HorizontalLayout(addRootFolderBtn, addSubfolderBtn);
         folderButtons1.setSpacing(true);
+        folderButtons1.getStyle().set("flex-wrap", "wrap");
         HorizontalLayout folderButtons2 = new HorizontalLayout(renameFolderBtn, deleteFolderBtn);
         folderButtons2.setSpacing(true);
+        folderButtons2.getStyle().set("flex-wrap", "wrap");
 
         // Konfiguracja TreeGrid
         folderTree.addHierarchyColumn(Folder::getName).setHeader("Nazwa").setFlexGrow(1);
@@ -230,6 +234,7 @@ public class UserView extends VerticalLayout {
         HorizontalLayout cardForm = new HorizontalLayout(qQuestion, qAnswer, createCardBtn);
         cardForm.setWidthFull();
         cardForm.setAlignItems(Alignment.END);
+        cardForm.getStyle().set("flex-wrap", "wrap").set("gap", "0.4em");
 
         panel.add(selectedFolderLabel, cardForm, cardsGrid);
         panel.setFlexGrow(1, cardsGrid);

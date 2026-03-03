@@ -1,8 +1,6 @@
 package org.project.flashcards.ui;
 
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Route;
@@ -83,16 +81,19 @@ public class StatsView extends VerticalLayout {
                 .set("background", "#fff")
                 .set("border-radius", "12px")
                 .set("box-shadow", "0 2px 12px rgba(0,0,0,0.08)")
-                .set("padding", "1.5em 2em")
+                .set("padding", "1em 1.2em")
                 .set("margin-bottom", "1em");
 
         H3 title = new H3("\uD83D\uDCC8 Podsumowanie og\u00F3lne");
         title.getStyle().set("margin-top", "0").set("color", "#2d3a4a");
 
-        HorizontalLayout metricsRow = new HorizontalLayout();
-        metricsRow.setWidthFull();
-        metricsRow.setJustifyContentMode(FlexComponent.JustifyContentMode.EVENLY);
-        metricsRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        Div metricsRow = new Div();
+        metricsRow.getStyle()
+                .set("display", "flex")
+                .set("flex-wrap", "wrap")
+                .set("gap", "0.6em")
+                .set("justify-content", "center")
+                .set("width", "100%");
 
         metricsRow.add(
                 buildMetricBox("Nauczone", totalLearned + " / " + totalCards, "#3a7bd5"),
@@ -121,16 +122,25 @@ public class StatsView extends VerticalLayout {
                 .set("background", "#fff")
                 .set("border-radius", "12px")
                 .set("box-shadow", "0 2px 12px rgba(0,0,0,0.08)")
-                .set("padding", "1.5em 2em")
+                .set("padding", "1em 1.2em")
                 .set("margin-bottom", "1em");
 
         // --- Nag\u0142\u00F3wek ---
-        HorizontalLayout headerRow = new HorizontalLayout();
-        headerRow.setWidthFull();
-        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        Div headerRow = new Div();
+        headerRow.getStyle()
+                .set("display", "flex")
+                .set("flex-wrap", "wrap")
+                .set("align-items", "center")
+                .set("gap", "0.4em")
+                .set("width", "100%");
 
         H3 folderTitle = new H3("\uD83D\uDCC1 " + fs.folderName());
-        folderTitle.getStyle().set("margin", "0").set("flex-grow", "1");
+        folderTitle.getStyle()
+                .set("margin", "0")
+                .set("flex", "1 1 auto")
+                .set("min-width", "0")
+                .set("word-break", "break-word")
+                .set("font-size", "clamp(1em, 4vw, 1.17em)");
 
         Span diffBadge = new Span(fs.difficultyLabel());
         diffBadge.getStyle()
@@ -159,10 +169,14 @@ public class StatsView extends VerticalLayout {
         pb.getStyle().set("margin-top", "0.5em");
 
         // --- Metryki ---
-        HorizontalLayout metricsRow = new HorizontalLayout();
-        metricsRow.setWidthFull();
-        metricsRow.setJustifyContentMode(FlexComponent.JustifyContentMode.EVENLY);
-        metricsRow.getStyle().set("margin-top", "1em").set("flex-wrap", "wrap");
+        Div metricsRow = new Div();
+        metricsRow.getStyle()
+                .set("display", "flex")
+                .set("flex-wrap", "wrap")
+                .set("gap", "0.6em")
+                .set("justify-content", "center")
+                .set("margin-top", "1em")
+                .set("width", "100%");
 
         metricsRow.add(
                 buildMetricBox("\u015Ar. powt\u00F3rek\ndo nauczenia",
@@ -237,8 +251,10 @@ public class StatsView extends VerticalLayout {
 
             Span label = new Span(labels[i]);
             label.getStyle()
-                    .set("min-width", "160px")
-                    .set("font-size", "0.82em")
+                    .set("min-width", "0")
+                    .set("width", "clamp(80px, 30vw, 160px)")
+                    .set("flex-shrink", "0")
+                    .set("font-size", "clamp(0.65em, 2vw, 0.82em)")
                     .set("text-align", "right")
                     .set("color", "#555");
 
@@ -264,8 +280,10 @@ public class StatsView extends VerticalLayout {
             double pctVal = total > 0 ? (double) distribution[i] / total * 100 : 0;
             Span value = new Span(distribution[i] + " (" + String.format("%.0f%%", pctVal) + ")");
             value.getStyle()
-                    .set("min-width", "80px")
-                    .set("font-size", "0.82em")
+                    .set("min-width", "0")
+                    .set("width", "clamp(50px, 15vw, 80px)")
+                    .set("flex-shrink", "0")
+                    .set("font-size", "clamp(0.65em, 2vw, 0.82em)")
                     .set("color", "#333")
                     .set("font-weight", "500");
 
@@ -284,7 +302,7 @@ public class StatsView extends VerticalLayout {
                 .set("background", "#fff")
                 .set("border-radius", "12px")
                 .set("box-shadow", "0 2px 12px rgba(0,0,0,0.08)")
-                .set("padding", "1.5em 2em")
+                .set("padding", "1em 1.2em")
                 .set("margin-bottom", "1em");
 
         H3 title = new H3("\uD83D\uDD2C Por\u00F3wnanie folder\u00F3w");
@@ -358,8 +376,10 @@ public class StatsView extends VerticalLayout {
 
             Span folderLabel = new Span("\uD83D\uDCC1 " + fs.folderName());
             folderLabel.getStyle()
-                    .set("min-width", "140px")
-                    .set("font-size", "0.85em")
+                    .set("min-width", "0")
+                    .set("width", "clamp(80px, 25vw, 140px)")
+                    .set("flex-shrink", "0")
+                    .set("font-size", "clamp(0.7em, 2vw, 0.85em)")
                     .set("text-align", "right")
                     .set("color", "#555");
 
@@ -408,16 +428,19 @@ public class StatsView extends VerticalLayout {
         Div box = new Div();
         box.getStyle()
                 .set("text-align", "center")
-                .set("padding", "0.75em 1em")
+                .set("padding", "0.6em 0.8em")
                 .set("background", color + "11")
                 .set("border-radius", "10px")
                 .set("border", "1px solid " + color + "33")
-                .set("min-width", "100px");
+                .set("flex", "1 1 calc(33% - 0.6em)")
+                .set("min-width", "80px")
+                .set("max-width", "180px")
+                .set("box-sizing", "border-box");
 
         Div valDiv = new Div();
         valDiv.setText(value);
         valDiv.getStyle()
-                .set("font-size", "1.4em")
+                .set("font-size", "clamp(1em, 3.5vw, 1.4em)")
                 .set("font-weight", "700")
                 .set("color", color)
                 .set("line-height", "1.2");

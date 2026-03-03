@@ -137,8 +137,9 @@ public class AdminView extends VerticalLayout {
 
         // Lewy panel: foldery
         VerticalLayout folderPanel = buildFolderPanel();
-        folderPanel.setWidth("350px");
-        folderPanel.setMinWidth("280px");
+        folderPanel.setWidth("100%");
+        folderPanel.setMaxWidth("350px");
+        folderPanel.setMinWidth("200px");
 
         // Prawy panel: fiszki
         VerticalLayout cardsPanel = buildCardsPanel();
@@ -147,6 +148,7 @@ public class AdminView extends VerticalLayout {
         content.setSizeFull();
         content.setFlexGrow(0, folderPanel);
         content.setFlexGrow(1, cardsPanel);
+        content.getStyle().set("flex-wrap", "wrap");
 
         page.add(content);
         page.setFlexGrow(1, content);
@@ -210,8 +212,10 @@ public class AdminView extends VerticalLayout {
 
         HorizontalLayout folderButtons1 = new HorizontalLayout(addRootFolderBtn, addSubfolderBtn);
         folderButtons1.setSpacing(true);
+        folderButtons1.getStyle().set("flex-wrap", "wrap");
         HorizontalLayout folderButtons2 = new HorizontalLayout(renameFolderBtn, deleteFolderBtn);
         folderButtons2.setSpacing(true);
+        folderButtons2.getStyle().set("flex-wrap", "wrap");
 
         // Konfiguracja TreeGrid
         folderTree.addHierarchyColumn(Folder::getName).setHeader("Nazwa").setFlexGrow(1);
@@ -317,6 +321,7 @@ public class AdminView extends VerticalLayout {
         HorizontalLayout cardForm = new HorizontalLayout(qQuestion, qAnswer, createCardBtn);
         cardForm.setWidthFull();
         cardForm.setAlignItems(Alignment.END);
+        cardForm.getStyle().set("flex-wrap", "wrap").set("gap", "0.4em");
 
         HorizontalLayout cardsBar = new HorizontalLayout(seedBtn);
 
@@ -385,6 +390,7 @@ public class AdminView extends VerticalLayout {
         HorizontalLayout userForm = new HorizontalLayout(firstName, lastName, username, email, password, score, admin, createUserBtn);
         userForm.setWidthFull();
         userForm.setAlignItems(Alignment.END);
+        userForm.getStyle().set("flex-wrap", "wrap").set("gap", "0.4em");
 
         HorizontalLayout usersBar = new HorizontalLayout(refreshUsersBtn);
         usersPage.add(usersBar, userForm, usersGrid);

@@ -61,6 +61,10 @@ public class MainLayout extends AppLayout {
         );
         header.setWidthFull();
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        header.getStyle()
+                .set("flex-wrap", "wrap")
+                .set("gap", "0.4em 0.8em")
+                .set("padding", "0.4em 0.8em");
 
         addToNavbar(header);
     }
