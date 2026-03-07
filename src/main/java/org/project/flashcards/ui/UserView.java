@@ -37,8 +37,8 @@ public class UserView extends VerticalLayout {
 
     private final TreeGrid<Folder> folderTree = new TreeGrid<>();
     private final Grid<FlashCard> cardsGrid = new Grid<>(FlashCard.class, false);
-    private final TextField qQuestion = new TextField("Pytanie");
-    private final TextField qAnswer = new TextField("Odpowiedź");
+    private final TextField qQuestion = new TextField("Pytanie (np. słowo w języku obcym)");
+    private final TextField qAnswer = new TextField("Odpowiedź (np. tłumaczenie)");
     private final Button createCardBtn = new Button("➕ Dodaj fiszkę");
     private final Span selectedFolderLabel = new Span("Nie wybrano folderu");
 
