@@ -1,25 +1,17 @@
 package org.project.flashcards.config;
 
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
-import org.project.flashcards.entity.User;
 import org.project.flashcards.repository.UserRepository;
 import org.project.flashcards.ui.LoginView;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Configuration
 @EnableMethodSecurity(jsr250Enabled = true) // włącza @RolesAllowed
@@ -31,16 +23,6 @@ public class SecurityConfig extends VaadinWebSecurity {
         this.successHandler = successHandler;
     }
 
-    @Bean
-    @Order(0)
-    SecurityFilterChain registrationChain(HttpSecurity http) throws Exception {
-        http.securityMatcher(new AntPathRequestMatcher("/api/register"))
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable);
-        return http.build();
-    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
