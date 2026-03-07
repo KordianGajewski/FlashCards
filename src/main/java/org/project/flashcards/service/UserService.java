@@ -34,6 +34,26 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void changePassword(String loginName, String currentPassword, String newPassword) {
+        User user = userRepository.findByEmail(loginName)
+                .or(() -> userRepository.findByUsername(loginName))
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono użytkownika"));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Obecne hasło jest nieprawidłowe");
+        }
+        if (newPassword.length() < 6) {
+            throw new IllegalArgumentException("Nowe hasło musi mieć co najmniej 6 znaków");
+        }
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Nowe hasło nie może być takie samo jak obecne");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     // Usunięto metody związane z aktywacją użytkownika
 }
 
