@@ -50,8 +50,8 @@ public class AdminView extends VerticalLayout {
     // ========= FISZKI =========
     private final TreeGrid<Folder> folderTree = new TreeGrid<>();
     private final Grid<FlashCard> cardsGrid = new Grid<>(FlashCard.class, false);
-    private final TextField qQuestion = new TextField("Pytanie");
-    private final TextField qAnswer  = new TextField("Odpowiedź");
+    private final TextField qQuestion = new TextField("Pytanie (np. słowo w języku obcym)");
+    private final TextField qAnswer  = new TextField("Odpowiedź (np. tłumaczenie)");
     private final Button createCardBtn = new Button("➕ Dodaj fiszkę", e -> createCard());
     private final Button seedBtn = new Button("Pobierz 50 losowych");
     private final Span selectedFolderLabel = new Span("Nie wybrano folderu");
