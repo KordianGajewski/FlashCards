@@ -59,6 +59,10 @@ public class UserFlashcardProgress {
     @Column(nullable = false)
     private int qualitySum = 0;
 
+    /** Osobista notatka użytkownika do fiszki (fonetyka, skojarzenia itp.). */
+    @Column(columnDefinition = "TEXT")
+    private String note;
+
     @Transient
     public boolean isLearned() {
         return streak >= 5;

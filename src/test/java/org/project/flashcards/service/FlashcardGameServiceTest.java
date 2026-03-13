@@ -235,5 +235,64 @@ class FlashcardGameServiceTest {
 
         assertThat(result).isEmpty();
     }
+
+    // ==================== getNote / saveNote ====================
+
+    @Test
+    @DisplayName("getNote — zwraca pusty string gdy brak progress")
+    void getNote_noProgress() {
+        when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
+        when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.empty());
+
+        String note = gameService.getNote(100L);
+
+        assertThat(note).isEmpty();
+    }
+
+    @Test
+    @DisplayName("getNote — zwraca istniejaca notatke")
+    void getNote_existingNote() {
+        when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
+        UserFlashcardProgress progress = new UserFlashcardProgress();
+        progress.setUser(user);
+        progress.setFlashcard(card);
+        progress.setNote("wymowa: helou");
+        progress.ensureSm2Defaults();
+        when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.of(progress));
+
+        String note = gameService.getNote(100L);
+
+        assertThat(note).isEqualTo("wymowa: helou");
+    }
+
+    @Test
+    @DisplayName("saveNote — zapisuje notatke do istniejacego progress")
+    void saveNote_existingProgress() {
+        when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
+        UserFlashcardProgress progress = new UserFlashcardProgress();
+        progress.setUser(user);
+        progress.setFlashcard(card);
+        progress.ensureSm2Defaults();
+        when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.of(progress));
+
+        gameService.saveNote(100L, "skojarzenie: halo");
+
+        assertThat(progress.getNote()).isEqualTo("skojarzenie: halo");
+        verify(progressRepository).save(progress);
+    }
+
+    @Test
+    @DisplayName("saveNote — tworzy nowy progress gdy nie istnieje")
+    void saveNote_createsProgress() {
+        when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
+        when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.empty());
+
+        gameService.saveNote(100L, "moja notatka");
+
+        verify(progressRepository).save(argThat(p ->
+                p.getUser().equals(user)
+                && p.getFlashcard().equals(card)
+                && "moja notatka".equals(p.getNote())));
+    }
 }
 

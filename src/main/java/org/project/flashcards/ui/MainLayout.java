@@ -28,6 +28,8 @@ public class MainLayout extends AppLayout {
 
     private final AuthenticationContext auth;
     private final UserService userService;
+    private final Span scoreBadge = new Span();
+    private final String loginName;
 
     public MainLayout(AuthenticationContext auth, UserService userService) {
         this.auth = auth;
@@ -49,11 +51,11 @@ public class MainLayout extends AppLayout {
         // Pokaż "Admin" tylko dla roli ADMIN
         boolean isAdmin = auth.hasAuthority("ROLE_ADMIN");
         adminLink.setVisible(isAdmin);
-        userLink.setVisible(!isAdmin); // <-- NOWE: widoczne tylko dla zwykłych użytkowników
+        userLink.setVisible(!isAdmin);
 
         // Nazwa zalogowanego użytkownika
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = (authentication != null) ? authentication.getName() : "Gość";
+        loginName = (authentication != null) ? authentication.getName() : "Gość";
 
         // Menu użytkownika (rozwijane po kliknięciu w nazwę)
         MenuBar userMenu = new MenuBar();
@@ -67,7 +69,7 @@ public class MainLayout extends AppLayout {
 
         Icon userIcon = VaadinIcon.USER.create();
         userIcon.setSize("1em");
-        Span userNameSpan = new Span(username);
+        Span userNameSpan = new Span(loginName);
         userNameSpan.getStyle().set("font-weight", "500");
         Icon chevron = VaadinIcon.CHEVRON_DOWN.create();
         chevron.setSize("0.8em");
@@ -76,7 +78,7 @@ public class MainLayout extends AppLayout {
 
         MenuItem userMenuItem = userMenu.addItem(userMenuLabel);
 
-        userMenuItem.getSubMenu().addItem("\uD83D\uDD11 Zmień hasło", e -> showChangePasswordDialog(username));
+        userMenuItem.getSubMenu().addItem("\uD83D\uDD11 Zmień hasło", e -> showChangePasswordDialog(loginName));
         userMenuItem.getSubMenu().addItem("\uD83D\uDD12 Wyloguj", e -> auth.logout());
 
         // „Rozpychacz"
@@ -84,10 +86,7 @@ public class MainLayout extends AppLayout {
         spacer.getStyle().set("flex-grow", "1");
 
         // Wynik użytkownika (badge) — widoczny tylko dla zwykłych użytkowników
-        Span scoreBadge = new Span();
         if (!isAdmin) {
-            int currentScore = userService.getScoreByLogin(username);
-            scoreBadge.setText("⭐ " + currentScore + " pkt");
             scoreBadge.getStyle()
                     .set("background", "linear-gradient(135deg, #f5a623, #f7c948)")
                     .set("color", "#fff")
@@ -97,6 +96,7 @@ public class MainLayout extends AppLayout {
                     .set("border-radius", "12px")
                     .set("box-shadow", "0 2px 6px rgba(245,166,35,0.3)")
                     .set("white-space", "nowrap");
+            refreshScore();
         } else {
             scoreBadge.setVisible(false);
         }
@@ -212,5 +212,27 @@ public class MainLayout extends AppLayout {
 
         dialog.add(layout);
         dialog.open();
+    }
+
+    /**
+     * Odświeża wynik (score badge) w nagłówku — wywołaj po każdej zmianie wyniku.
+     */
+    public void refreshScore() {
+        int currentScore = userService.getScoreByLogin(loginName);
+        scoreBadge.setText("⭐ " + currentScore + " pkt");
+    }
+
+    /**
+     * Znajduje MainLayout wspinając się po drzewie komponentów z dowolnego widoku-dziecka.
+     */
+    public static void refreshScoreFrom(com.vaadin.flow.component.Component child) {
+        com.vaadin.flow.component.Component c = child;
+        while (c != null) {
+            if (c instanceof MainLayout ml) {
+                ml.refreshScore();
+                return;
+            }
+            c = c.getParent().orElse(null);
+        }
     }
 }

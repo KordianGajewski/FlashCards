@@ -180,6 +180,38 @@ public class FlashcardGameService {
 
     // ===== helpers =====
 
+    /**
+     * Pobiera notatkę użytkownika do fiszki (lub pusty string jeśli brak).
+     */
+    public String getNote(Long flashcardId) {
+        User user = getCurrentUserOrThrow();
+        FlashCard fc = flashCardRepository.findById(flashcardId)
+                .orElseThrow(() -> new NoSuchElementException("Brak fiszki id=" + flashcardId));
+        return progressRepository.findByUserAndFlashcard(user, fc)
+                .map(UserFlashcardProgress::getNote)
+                .orElse("");
+    }
+
+    /**
+     * Zapisuje notatkę użytkownika do fiszki (tworzy rekord progress jeśli nie istnieje).
+     */
+    public void saveNote(Long flashcardId, String note) {
+        User user = getCurrentUserOrThrow();
+        FlashCard fc = flashCardRepository.findById(flashcardId)
+                .orElseThrow(() -> new NoSuchElementException("Brak fiszki id=" + flashcardId));
+        UserFlashcardProgress progress = progressRepository
+                .findByUserAndFlashcard(user, fc)
+                .orElseGet(() -> {
+                    UserFlashcardProgress p = new UserFlashcardProgress();
+                    p.setUser(user);
+                    p.setFlashcard(fc);
+                    p.ensureSm2Defaults();
+                    return p;
+                });
+        progress.setNote(note);
+        progressRepository.save(progress);
+    }
+
     private User getCurrentUserOrThrow() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) throw new IllegalStateException("Brak autentykacji");

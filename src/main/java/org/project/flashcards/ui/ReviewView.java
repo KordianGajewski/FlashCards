@@ -4,8 +4,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
@@ -35,6 +37,12 @@ public class ReviewView extends VerticalLayout {
     private final HorizontalLayout wrongQualityButtons = new HorizontalLayout();
     private final HorizontalLayout correctQualityButtons = new HorizontalLayout();
     private final Paragraph scheduleInfo = new Paragraph();
+
+    // --- Notatka ---
+    private final Button noteToggleBtn = new Button("📝 Notatka");
+    private final VerticalLayout notePanel = new VerticalLayout();
+    private final TextArea noteArea = new TextArea();
+    private final Button noteSaveBtn = new Button("💾 Zapisz notatkę");
 
     @Autowired
     public ReviewView(FlashcardGameService game) {
@@ -118,7 +126,52 @@ public class ReviewView extends VerticalLayout {
         }
         correctQualityButtons.setVisible(false);
         correctQualityButtons.getStyle().set("flex-wrap", "wrap").set("justify-content", "center");
-        add(wrongQualityButtons, correctQualityButtons);
+
+        // --- Panel notatki (ukryty domyślnie) ---
+        noteArea.setPlaceholder("Wpisz notatkę (fonetyka, skojarzenia…)");
+        noteArea.setWidthFull();
+        noteArea.setMaxWidth("320px");
+        noteArea.setMaxHeight("120px");
+        noteArea.getStyle()
+                .set("background", "#fffbe6")
+                .set("border-radius", "8px")
+                .set("font-size", "0.9rem");
+
+        noteSaveBtn.getStyle()
+                .set("background", "#76b852")
+                .set("color", "#fff")
+                .set("border-radius", "6px")
+                .set("font-size", "0.85rem");
+        noteSaveBtn.addClickListener(e -> {
+            if (current != null) {
+                game.saveNote(current.getId(), noteArea.getValue());
+                Notification.show("Notatka zapisana ✅", 2000, Notification.Position.TOP_CENTER);
+            }
+        });
+
+        notePanel.setAlignItems(Alignment.START);
+        notePanel.setPadding(false);
+        notePanel.setSpacing(true);
+        notePanel.add(noteArea, noteSaveBtn);
+        notePanel.setVisible(false);
+
+        noteToggleBtn.getStyle()
+                .set("background", "#fffbe6")
+                .set("color", "#7a6c2a")
+                .set("border", "1px solid #e6d77a")
+                .set("border-radius", "6px")
+                .set("font-size", "0.85rem")
+                .set("cursor", "pointer");
+        noteToggleBtn.addClickListener(e -> {
+            boolean opening = !notePanel.isVisible();
+            notePanel.setVisible(opening);
+            if (opening && current != null) {
+                String existingNote = game.getNote(current.getId());
+                noteArea.setValue(existingNote != null ? existingNote : "");
+            }
+        });
+
+        add(noteToggleBtn, notePanel, wrongQualityButtons, correctQualityButtons);
     }
 
     private void loadRandomExcluding(Long excludeId) {
@@ -126,6 +179,8 @@ public class ReviewView extends VerticalLayout {
         revealBtn.setVisible(false);
         wrongQualityButtons.setVisible(false);
         correctQualityButtons.setVisible(false);
+        notePanel.setVisible(false);
+        noteArea.clear();
         Optional<FlashCard> opt = (excludeId == null)
                 ? game.getRandomLearnedForCurrentUser()
                 : game.getRandomLearnedForCurrentUserExcluding(excludeId);
@@ -186,6 +241,7 @@ public class ReviewView extends VerticalLayout {
                 " | EF: " + String.format("%.2f", result.easinessFactor()));
         wrongQualityButtons.setVisible(false);
         correctQualityButtons.setVisible(false);
+        MainLayout.refreshScoreFrom(this);
         loadRandomExcluding(current.getId());
     }
 }
