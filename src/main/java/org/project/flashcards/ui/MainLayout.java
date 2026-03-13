@@ -83,6 +83,24 @@ public class MainLayout extends AppLayout {
         Span spacer = new Span();
         spacer.getStyle().set("flex-grow", "1");
 
+        // Wynik użytkownika (badge) — widoczny tylko dla zwykłych użytkowników
+        Span scoreBadge = new Span();
+        if (!isAdmin) {
+            int currentScore = userService.getScoreByLogin(username);
+            scoreBadge.setText("⭐ " + currentScore + " pkt");
+            scoreBadge.getStyle()
+                    .set("background", "linear-gradient(135deg, #f5a623, #f7c948)")
+                    .set("color", "#fff")
+                    .set("font-weight", "600")
+                    .set("font-size", "0.85rem")
+                    .set("padding", "0.25em 0.7em")
+                    .set("border-radius", "12px")
+                    .set("box-shadow", "0 2px 6px rgba(245,166,35,0.3)")
+                    .set("white-space", "nowrap");
+        } else {
+            scoreBadge.setVisible(false);
+        }
+
         HorizontalLayout header = new HorizontalLayout(
                 title,
                 quizLink,
@@ -91,6 +109,7 @@ public class MainLayout extends AppLayout {
                 adminLink,
                 userLink,
                 spacer,
+                scoreBadge,
                 userMenu
         );
         header.setWidthFull();

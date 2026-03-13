@@ -30,6 +30,12 @@ public class SecurityConfig extends VaadinWebSecurity {
         // bo super.configure() wywołuje anyRequest() i po nim nie można dodawać matcherów
         http.formLogin(form -> form.successHandler(successHandler));
         http.logout(logout -> logout.logoutSuccessUrl("/login"));
+
+        // Zapobiegaj utracie sesji przy zmianie User-Agent (np. "Wersja na komputer" na telefonie)
+        http.sessionManagement(session -> session
+                .sessionFixation().migrateSession()
+        );
+
         super.configure(http);
         setLoginView(http, LoginView.class);
     }

@@ -112,4 +112,8 @@ public interface UserFlashcardProgressRepository extends JpaRepository<UserFlash
           and p.nextReview <= :today
         """)
     long countDueByUserAndDate(@Param("userId") Long userId, @Param("today") LocalDate today);
+
+    /** Wszystkie rekordy postępu danego użytkownika (do obliczania score). */
+    @Query("select p from UserFlashcardProgress p where p.user.id = :userId")
+    List<UserFlashcardProgress> findAllByUserId(@Param("userId") Long userId);
 }

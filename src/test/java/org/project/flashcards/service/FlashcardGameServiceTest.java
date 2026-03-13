@@ -40,6 +40,9 @@ class FlashcardGameServiceTest {
     @Mock
     private FolderService folderService;
 
+    @Mock
+    private UserService userService;
+
     private User user;
     private Folder folder;
     private FlashCard card;

@@ -21,17 +21,20 @@ public class FlashcardGameService {
     private final UserRepository userRepository;
     private final Sm2Scheduler sm2Scheduler;
     private final FolderService folderService;
+    private final UserService userService;
 
     public FlashcardGameService(FlashCardRepository flashCardRepository,
                                 UserFlashcardProgressRepository progressRepository,
                                 UserRepository userRepository,
                                 Sm2Scheduler sm2Scheduler,
-                                FolderService folderService) {
+                                FolderService folderService,
+                                UserService userService) {
         this.flashCardRepository = flashCardRepository;
         this.progressRepository = progressRepository;
         this.userRepository = userRepository;
         this.sm2Scheduler = sm2Scheduler;
         this.folderService = folderService;
+        this.userService = userService;
     }
 
     /**
@@ -105,6 +108,9 @@ public class FlashcardGameService {
 
         sm2Scheduler.applyQuality(progress, quality);
         progressRepository.save(progress);
+
+        // Przelicz wynik punktowy użytkownika
+        userService.recalculateScore(user);
 
         return new ReviewResult(
                 correctHit,
