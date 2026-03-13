@@ -344,9 +344,11 @@ public class AdminView extends VerticalLayout {
 
     private VerticalLayout buildUsersPage() {
         VerticalLayout usersPage = new VerticalLayout();
-        usersPage.setSizeFull();
+        usersPage.setWidthFull();
         usersPage.setPadding(false);
         usersPage.setSpacing(false);
+        usersPage.getStyle().set("min-height", "0");
+        usersPage.getStyle().set("flex-grow", "1");
 
         usersGrid.getStyle().set("background", "#ffffffcc");
         usersGrid.getStyle().set("border-radius", "8px");
@@ -367,7 +369,9 @@ public class AdminView extends VerticalLayout {
             del.getElement().getThemeList().add("error");
             return del;
         })).setHeader("Akcje").setAutoWidth(true);
-        usersGrid.setSizeFull();
+        usersGrid.setWidthFull();
+        usersGrid.setMinHeight("300px");
+        usersGrid.getStyle().set("flex-grow", "1");
 
         // formularz dodawania użytkownika
         score.setMin(0);
@@ -404,6 +408,8 @@ public class AdminView extends VerticalLayout {
 
         HorizontalLayout usersBar = new HorizontalLayout(refreshUsersBtn);
         usersPage.add(usersBar, userForm, usersGrid);
+        usersPage.setFlexGrow(1, usersGrid);
+        usersPage.getStyle().set("overflow", "auto");
         return usersPage;
     }
 
