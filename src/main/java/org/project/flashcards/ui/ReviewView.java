@@ -185,13 +185,18 @@ public class ReviewView extends VerticalLayout {
                 ? game.getRandomLearnedForCurrentUser()
                 : game.getRandomLearnedForCurrentUserExcluding(excludeId);
         if (opt.isEmpty()) {
+            current = null;
             question.setText("Brak słówek do powtórzenia. Świetna robota! 🎉");
             checkBtn.setEnabled(false);
             revealBtn.setVisible(false);
             nextBtn.setEnabled(false);
+            answerField.setVisible(false);
+            noteToggleBtn.setVisible(false);
             return;
         }
         current = opt.get();
+        answerField.setVisible(true);
+        noteToggleBtn.setVisible(true);
         String mode = Math.random() < 0.5 ? "EN-PL" : "PL-EN";
         currentDirection = mode;
         if (mode.equals("EN-PL")) {

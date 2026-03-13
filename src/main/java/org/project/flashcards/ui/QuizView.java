@@ -224,14 +224,27 @@ public class QuizView extends VerticalLayout {
                 ? game.getRandomForCurrentUser()
                 : game.getRandomForCurrentUserExcluding(excludeId);
         if (opt.isEmpty()) {
+            current = null;
             flashcardDiv.setText("");
-            header.setText("Wszystko opanowane (poziom 5) – brak fiszek do nauki.");
             checkBtn.setEnabled(false);
             revealBtn.setVisible(false);
             nextBtn.setEnabled(false);
+            answerField.setVisible(false);
+            noteToggleBtn.setVisible(false);
+
+            // Rozróżnij przyczynę braku fiszek
+            FlashcardGameService.QuizStatus status = game.getQuizStatus();
+            switch (status) {
+                case NO_ACTIVE_FOLDERS -> header.setText("Brak aktywnych folderów — aktywuj folder w zakładce Moje fiszki.");
+                case NO_CARDS -> header.setText("Brak fiszek w aktywnych folderach — dodaj fiszki, aby rozpocząć naukę.");
+                case ALL_MASTERED -> header.setText("Wszystko opanowane! 🎉 Następne powtórki pojawią się wg harmonogramu.");
+                default -> header.setText("Brak fiszek do nauki.");
+            }
             return;
         }
         current = opt.get();
+        answerField.setVisible(true);
+        noteToggleBtn.setVisible(true);
         String mode = quizMode;
         if (mode.equals("RANDOM")) {
             mode = Math.random() < 0.5 ? "EN-PL" : "PL-EN";

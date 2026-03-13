@@ -229,8 +229,36 @@ public class FlashcardGameService {
 
     // DTO wyniku
     public record ReviewResult(boolean correct,
-                               int streak,
-                               LocalDate nextReview,
-                               double easinessFactor,
-                               String correctAnswer) { }
+                                int streak,
+                                LocalDate nextReview,
+                                double easinessFactor,
+                                String correctAnswer) { }
+
+    /** Status quizu — do wyświetlenia odpowiedniego komunikatu gdy brak fiszek. */
+    public enum QuizStatus {
+        /** Są fiszki do nauki / powtórki. */
+        HAS_CARDS,
+        /** Brak aktywnych folderów. */
+        NO_ACTIVE_FOLDERS,
+        /** Brak fiszek w aktywnych folderach. */
+        NO_CARDS,
+        /** Wszystkie fiszki opanowane (streak ≥ 5), czekają na zaplanowane powtórki. */
+        ALL_MASTERED
+    }
+
+    /**
+     * Zwraca status quizu — pozwala rozróżnić różne przyczyny braku fiszek.
+     */
+    public QuizStatus getQuizStatus() {
+        User user = getCurrentUserOrThrow();
+        Set<Long> activeFolderIds = folderService.getActiveFolderIds(user);
+        if (activeFolderIds.isEmpty()) {
+            return QuizStatus.NO_ACTIVE_FOLDERS;
+        }
+        long totalCards = flashCardRepository.findByFolderIdIn(activeFolderIds).size();
+        if (totalCards == 0) {
+            return QuizStatus.NO_CARDS;
+        }
+        return QuizStatus.ALL_MASTERED;
+    }
 }
