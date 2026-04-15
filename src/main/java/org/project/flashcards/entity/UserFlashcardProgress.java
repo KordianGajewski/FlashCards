@@ -59,9 +59,13 @@ public class UserFlashcardProgress {
     @Column(nullable = false)
     private int qualitySum = 0;
 
-    /** Osobista notatka użytkownika do fiszki (fonetyka, skojarzenia itp.). */
+    /** Notatka użytkownika po stronie pytania (question / obcy język). */
     @Column(columnDefinition = "TEXT")
-    private String note;
+    private String frontNote;
+
+    /** Notatka użytkownika po stronie odpowiedzi (answer / polski). */
+    @Column(columnDefinition = "TEXT")
+    private String backNote;
 
     @Transient
     public boolean isLearned() {

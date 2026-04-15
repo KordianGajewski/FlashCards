@@ -181,21 +181,33 @@ public class FlashcardGameService {
     // ===== helpers =====
 
     /**
-     * Pobiera notatkę użytkownika do fiszki (lub pusty string jeśli brak).
+     * Pobiera notatkę po stronie pytania (front) — lub pusty string.
      */
-    public String getNote(Long flashcardId) {
+    public String getFrontNote(Long flashcardId) {
         User user = getCurrentUserOrThrow();
         FlashCard fc = flashCardRepository.findById(flashcardId)
                 .orElseThrow(() -> new NoSuchElementException("Brak fiszki id=" + flashcardId));
         return progressRepository.findByUserAndFlashcard(user, fc)
-                .map(UserFlashcardProgress::getNote)
+                .map(UserFlashcardProgress::getFrontNote)
                 .orElse("");
     }
 
     /**
-     * Zapisuje notatkę użytkownika do fiszki (tworzy rekord progress jeśli nie istnieje).
+     * Pobiera notatkę po stronie odpowiedzi (back) — lub pusty string.
      */
-    public void saveNote(Long flashcardId, String note) {
+    public String getBackNote(Long flashcardId) {
+        User user = getCurrentUserOrThrow();
+        FlashCard fc = flashCardRepository.findById(flashcardId)
+                .orElseThrow(() -> new NoSuchElementException("Brak fiszki id=" + flashcardId));
+        return progressRepository.findByUserAndFlashcard(user, fc)
+                .map(UserFlashcardProgress::getBackNote)
+                .orElse("");
+    }
+
+    /**
+     * Zapisuje obie notatki (front + back). Tworzy rekord progress jeśli nie istnieje.
+     */
+    public void saveNotes(Long flashcardId, String frontNote, String backNote) {
         User user = getCurrentUserOrThrow();
         FlashCard fc = flashCardRepository.findById(flashcardId)
                 .orElseThrow(() -> new NoSuchElementException("Brak fiszki id=" + flashcardId));
@@ -208,7 +220,8 @@ public class FlashcardGameService {
                     p.ensureSm2Defaults();
                     return p;
                 });
-        progress.setNote(note);
+        progress.setFrontNote(frontNote);
+        progress.setBackNote(backNote);
         progressRepository.save(progress);
     }
 

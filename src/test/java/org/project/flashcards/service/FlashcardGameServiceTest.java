@@ -236,38 +236,67 @@ class FlashcardGameServiceTest {
         assertThat(result).isEmpty();
     }
 
-    // ==================== getNote / saveNote ====================
+    // ==================== getFrontNote / getBackNote / saveNotes ====================
 
     @Test
-    @DisplayName("getNote — zwraca pusty string gdy brak progress")
-    void getNote_noProgress() {
+    @DisplayName("getFrontNote — zwraca pusty string gdy brak progress")
+    void getFrontNote_noProgress() {
         when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
         when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.empty());
 
-        String note = gameService.getNote(100L);
+        String note = gameService.getFrontNote(100L);
 
         assertThat(note).isEmpty();
     }
 
     @Test
-    @DisplayName("getNote — zwraca istniejaca notatke")
-    void getNote_existingNote() {
+    @DisplayName("getBackNote — zwraca pusty string gdy brak progress")
+    void getBackNote_noProgress() {
+        when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
+        when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.empty());
+
+        String note = gameService.getBackNote(100L);
+
+        assertThat(note).isEmpty();
+    }
+
+    @Test
+    @DisplayName("getFrontNote — zwraca istniejaca notatke front")
+    void getFrontNote_existingNote() {
         when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
         UserFlashcardProgress progress = new UserFlashcardProgress();
         progress.setUser(user);
         progress.setFlashcard(card);
-        progress.setNote("wymowa: helou");
+        progress.setFrontNote("wymowa: helou");
+        progress.setBackNote("skojarzenie: cześć");
         progress.ensureSm2Defaults();
         when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.of(progress));
 
-        String note = gameService.getNote(100L);
+        String note = gameService.getFrontNote(100L);
 
         assertThat(note).isEqualTo("wymowa: helou");
     }
 
     @Test
-    @DisplayName("saveNote — zapisuje notatke do istniejacego progress")
-    void saveNote_existingProgress() {
+    @DisplayName("getBackNote — zwraca istniejaca notatke back")
+    void getBackNote_existingNote() {
+        when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
+        UserFlashcardProgress progress = new UserFlashcardProgress();
+        progress.setUser(user);
+        progress.setFlashcard(card);
+        progress.setFrontNote("wymowa: helou");
+        progress.setBackNote("skojarzenie: cześć");
+        progress.ensureSm2Defaults();
+        when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.of(progress));
+
+        String note = gameService.getBackNote(100L);
+
+        assertThat(note).isEqualTo("skojarzenie: cześć");
+    }
+
+    @Test
+    @DisplayName("saveNotes — zapisuje obie notatki do istniejacego progress")
+    void saveNotes_existingProgress() {
         when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
         UserFlashcardProgress progress = new UserFlashcardProgress();
         progress.setUser(user);
@@ -275,24 +304,26 @@ class FlashcardGameServiceTest {
         progress.ensureSm2Defaults();
         when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.of(progress));
 
-        gameService.saveNote(100L, "skojarzenie: halo");
+        gameService.saveNotes(100L, "wymowa: helou", "skojarzenie: halo");
 
-        assertThat(progress.getNote()).isEqualTo("skojarzenie: halo");
+        assertThat(progress.getFrontNote()).isEqualTo("wymowa: helou");
+        assertThat(progress.getBackNote()).isEqualTo("skojarzenie: halo");
         verify(progressRepository).save(progress);
     }
 
     @Test
-    @DisplayName("saveNote — tworzy nowy progress gdy nie istnieje")
-    void saveNote_createsProgress() {
+    @DisplayName("saveNotes — tworzy nowy progress gdy nie istnieje")
+    void saveNotes_createsProgress() {
         when(flashCardRepository.findById(100L)).thenReturn(Optional.of(card));
         when(progressRepository.findByUserAndFlashcard(user, card)).thenReturn(Optional.empty());
 
-        gameService.saveNote(100L, "moja notatka");
+        gameService.saveNotes(100L, "front notatka", "back notatka");
 
         verify(progressRepository).save(argThat(p ->
                 p.getUser().equals(user)
                 && p.getFlashcard().equals(card)
-                && "moja notatka".equals(p.getNote())));
+                && "front notatka".equals(p.getFrontNote())
+                && "back notatka".equals(p.getBackNote())));
     }
 }
 

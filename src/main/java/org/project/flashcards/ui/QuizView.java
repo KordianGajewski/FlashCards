@@ -40,11 +40,13 @@ public class QuizView extends VerticalLayout {
     private final HorizontalLayout correctQualityButtons = new HorizontalLayout();
     private final Paragraph scheduleInfo = new Paragraph();
 
-    // --- Notatka ---
+    // --- Notatki (dwie strony fiszki) ---
     private final Button noteToggleBtn = new Button("📝 Notatka");
     private final VerticalLayout notePanel = new VerticalLayout();
-    private final TextArea noteArea = new TextArea();
-    private final Button noteSaveBtn = new Button("💾 Zapisz notatkę");
+    private final TextArea questionNoteArea = new TextArea();
+    private final TextArea answerNoteArea = new TextArea();
+    private final Button noteSaveBtn = new Button("💾 Zapisz notatki");
+    private boolean answerRevealed = false;
 
     @Autowired
     public QuizView(FlashcardGameService game) {
@@ -117,6 +119,9 @@ public class QuizView extends VerticalLayout {
             if (current != null) {
                 String correctAnswer = currentDirection.equals("EN-PL") ? current.getAnswer() : current.getQuestion();
                 feedback.setText("✔ Poprawna odpowiedź: " + nullSafe(correctAnswer));
+                // Odkryj stronę odpowiedzi w notatkach
+                answerRevealed = true;
+                answerNoteArea.setVisible(notePanel.isVisible());
             }
         });
         nextBtn.addClickListener(e -> loadRandomExcluding(current != null ? current.getId() : null));
@@ -163,15 +168,25 @@ public class QuizView extends VerticalLayout {
         correctQualityButtons.setVisible(false);
         correctQualityButtons.getStyle().set("flex-wrap", "wrap").set("justify-content", "center");
 
-        // --- Panel notatki (ukryty domyślnie) ---
-        noteArea.setPlaceholder("Wpisz notatkę (fonetyka, skojarzenia…)");
-        noteArea.setWidthFull();
-        noteArea.setMaxWidth("320px");
-        noteArea.setMaxHeight("120px");
-        noteArea.getStyle()
+        // --- Panel notatek (dwie strony fiszki, ukryty domyślnie) ---
+        questionNoteArea.setPlaceholder("Notatka — strona pytania");
+        questionNoteArea.setWidthFull();
+        questionNoteArea.setMaxWidth("320px");
+        questionNoteArea.setMaxHeight("100px");
+        questionNoteArea.getStyle()
                 .set("background", "#fffbe6")
                 .set("border-radius", "8px")
                 .set("font-size", "0.9rem");
+
+        answerNoteArea.setPlaceholder("Notatka — strona odpowiedzi");
+        answerNoteArea.setWidthFull();
+        answerNoteArea.setMaxWidth("320px");
+        answerNoteArea.setMaxHeight("100px");
+        answerNoteArea.getStyle()
+                .set("background", "#e6f7ff")
+                .set("border-radius", "8px")
+                .set("font-size", "0.9rem");
+        answerNoteArea.setVisible(false); // ukryta do momentu odkrycia odpowiedzi
 
         noteSaveBtn.getStyle()
                 .set("background", "#76b852")
@@ -180,15 +195,26 @@ public class QuizView extends VerticalLayout {
                 .set("font-size", "0.85rem");
         noteSaveBtn.addClickListener(e -> {
             if (current != null) {
-                game.saveNote(current.getId(), noteArea.getValue());
-                Notification.show("Notatka zapisana ✅", 2000, Notification.Position.TOP_CENTER);
+                // Ustal która strona to front (question/EN), a która back (answer/PL)
+                String frontNote, backNote;
+                if (currentDirection.equals("EN-PL")) {
+                    // pytanie = front (EN), odpowiedź = back (PL)
+                    frontNote = questionNoteArea.getValue();
+                    backNote = answerNoteArea.getValue();
+                } else {
+                    // pytanie = back (PL), odpowiedź = front (EN)
+                    backNote = questionNoteArea.getValue();
+                    frontNote = answerNoteArea.getValue();
+                }
+                game.saveNotes(current.getId(), frontNote, backNote);
+                Notification.show("Notatki zapisane ✅", 2000, Notification.Position.TOP_CENTER);
             }
         });
 
         notePanel.setAlignItems(Alignment.CENTER);
         notePanel.setPadding(false);
         notePanel.setSpacing(true);
-        notePanel.add(noteArea, noteSaveBtn);
+        notePanel.add(questionNoteArea, answerNoteArea, noteSaveBtn);
         notePanel.setVisible(false);
 
         noteToggleBtn.getStyle()
@@ -202,8 +228,17 @@ public class QuizView extends VerticalLayout {
             boolean opening = !notePanel.isVisible();
             notePanel.setVisible(opening);
             if (opening && current != null) {
-                String existingNote = game.getNote(current.getId());
-                noteArea.setValue(existingNote != null ? existingNote : "");
+                String frontNote = game.getFrontNote(current.getId());
+                String backNote = game.getBackNote(current.getId());
+                if (currentDirection.equals("EN-PL")) {
+                    questionNoteArea.setValue(frontNote != null ? frontNote : "");
+                    answerNoteArea.setValue(backNote != null ? backNote : "");
+                } else {
+                    questionNoteArea.setValue(backNote != null ? backNote : "");
+                    answerNoteArea.setValue(frontNote != null ? frontNote : "");
+                }
+                // Strona odpowiedzi widoczna tylko po odkryciu
+                answerNoteArea.setVisible(answerRevealed);
             }
         });
 
@@ -219,7 +254,10 @@ public class QuizView extends VerticalLayout {
         wrongQualityButtons.setVisible(false);
         correctQualityButtons.setVisible(false);
         notePanel.setVisible(false);
-        noteArea.clear();
+        questionNoteArea.clear();
+        answerNoteArea.clear();
+        answerNoteArea.setVisible(false);
+        answerRevealed = false;
         Optional<FlashCard> opt = (excludeId == null)
                 ? game.getRandomForCurrentUser()
                 : game.getRandomForCurrentUserExcluding(excludeId);
@@ -267,6 +305,11 @@ public class QuizView extends VerticalLayout {
         String correctAnswer = currentDirection.equals("EN-PL") ? current.getAnswer() : current.getQuestion();
         String userAnswer = answerField.getValue().trim().toLowerCase();
         boolean isCorrect = userAnswer.equalsIgnoreCase(correctAnswer.trim().toLowerCase());
+
+        // Odkryj stronę odpowiedzi w notatkach
+        answerRevealed = true;
+        answerNoteArea.setVisible(notePanel.isVisible());
+
         if (isCorrect) {
             Notification.show("✅ Dobrze! Oceń jak dobrze znałeś odpowiedź.", 3000, Notification.Position.MIDDLE);
             correctQualityButtons.setVisible(true);
